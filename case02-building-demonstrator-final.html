@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Case 02 – Design across demographic change and fluctuating occupancy</title>
+<style>
+:root{
+  --bg:#f2f0ec;
+  --paper:#fbfaf7;
+  --ink:#171717;
+  --muted:#70706c;
+  --line:#d8d5cf;
+  --accent:#b53c31;
+  --soft:#eee9e2;
+  --school:#9aae78;
+  --office:#6f8792;
+  --senior:#b98352;
+  --vacant:#f4f1ec;
+  --shadow:0 10px 30px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{padding:20px}
+.app{max-width:1520px;margin:0 auto;display:grid;gap:14px}
+.panel{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+header{padding:24px 26px 20px}
+h1,h2,h3,p{margin:0}
+h1{font-size:34px;line-height:1.03;letter-spacing:-.035em;font-weight:700}
+.subtitle{margin-top:8px;color:var(--muted);max-width:1080px;font-size:14px;line-height:1.45}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);margin-top:18px}
+.step{padding:12px 10px;border-right:1px solid var(--line);font-size:12px}
+.step:last-child{border-right:0}.step b{display:block;font-size:11px;color:var(--accent);margin-bottom:3px;letter-spacing:.08em}
+.layout{display:grid;grid-template-columns:370px minmax(0,1fr);gap:14px;align-items:start}
+.controls{position:sticky;top:14px}.controls .inner,.section .inner{padding:16px}
+.control{margin-bottom:15px}label{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+select,input,button{font:inherit}select,input[type=number]{width:100%;padding:10px 11px;border:1px solid var(--line);background:white}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.value{font-variant-numeric:tabular-nums;font-weight:700;min-width:62px;text-align:right}
+button{border:1px solid var(--ink);background:var(--ink);color:white;padding:9px 11px;cursor:pointer}button.secondary{background:white;color:var(--ink)}
+.buttonrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.note{font-size:12px;color:#5f5149;background:#f3e9e3;border-left:3px solid var(--accent);padding:10px 11px;line-height:1.45}
+.main{display:grid;gap:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding:13px 16px}.section-title h2{font-size:17px;letter-spacing:-.02em}
+.kicker{font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}.small{font-size:12px;color:var(--muted);line-height:1.42}
+.state-wrap{display:grid;grid-template-columns:minmax(280px,1.15fr) minmax(220px,.85fr);gap:18px;align-items:center}.state-card{border:1px solid var(--line);background:white;padding:10px}
+.state-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}.meta{border-top:1px solid var(--line);padding-top:8px}.meta span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.meta b{display:block;margin-top:2px;font-size:13px}
+.program-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.program-inputs input{padding:8px}.program-sum{margin-top:5px;font-size:11px;color:var(--muted)}
+.tree{display:grid;gap:10px}.tree-root{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center}.node{border:1px solid var(--line);background:white;padding:10px;font-size:12px}.branches{display:grid;gap:8px}.branch{display:grid;grid-template-columns:125px 1fr 52px;gap:8px;align-items:center;font-size:12px}.bar{height:12px;border:1px solid var(--line);background:#f2f2ee;overflow:hidden;position:relative}.fill{display:block;height:100%;min-width:2px;box-shadow:inset -1px 0 0 rgba(0,0,0,.14)}
+.formula{font-family:Georgia,serif;font-size:17px;background:#f7f4ef;border:1px solid var(--line);padding:10px 12px}.family-card{border:1px solid var(--line);background:white;padding:10px;display:grid;gap:6px}.family-card b{font-size:13px}.family-card svg{width:100%;height:auto;display:block}
+.summaryline{font-size:11px;color:var(--muted);line-height:1.35}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)}.leg{display:flex;align-items:center;gap:5px}.dot{width:10px;height:10px;border:1px solid var(--line)}.legend-large{margin-top:10px;border:1px solid var(--line);background:white;padding:12px}.legend-large-title{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:10px}.legend-large .leg{gap:10px;font-size:14px;color:var(--ink);margin-bottom:8px}.legend-large .leg:last-child{margin-bottom:0}.legend-large .dot{width:22px;height:22px;border:1px solid #b9b2a8;flex:0 0 22px}.legend-large .leg small{display:block;font-size:11px;color:var(--muted);line-height:1.25}
+.subsection{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}.subsection:first-child{border-top:0;padding-top:0;margin-top:0}.subhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}.subhead b{font-size:13px;letter-spacing:.02em}
+.field-stage{display:grid;grid-template-columns:minmax(240px,.72fr) 52px minmax(0,2fr);gap:10px;align-items:center}.stage-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px}.arrow-box{font-size:28px;text-align:center;color:var(--accent);line-height:1}
+.same-horizon{border-left:3px solid var(--accent);padding:8px 10px;background:#f7f2ed;margin:10px 0 12px;font-size:12px;line-height:1.4}.recursive-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:10px}.recursive-controls .control{margin:0;min-width:210px}.recursive-stage{display:grid;grid-template-columns:minmax(240px,.72fr) 80px minmax(0,2fr);gap:10px;align-items:center}.future-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rec-arrow{text-align:center;color:var(--accent);font-size:11px;line-height:1.25}.rec-arrow strong{display:block;font-size:30px;font-weight:400;line-height:1;margin:3px 0}
+.design-use{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.use-card{border:1px solid var(--line);background:white;padding:11px}.use-card b{font-size:12px}.use-card p{font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.footer{font-size:11px;color:var(--muted);padding:12px 16px}.warning{color:var(--accent);font-weight:700}.profile-axis{display:grid;grid-template-columns:1fr 1fr 1fr;font-size:10px;color:var(--muted);margin-top:2px}.profile-axis span:nth-child(2){text-align:center}.profile-axis span:last-child{text-align:right}
+.metricstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.metric{border:1px solid var(--line);background:white;padding:8px}.metric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.metric b{font-size:15px;display:block;margin-top:2px}.how-read{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.how-read-title{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:8px}.how-read-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.how-read-item{border:1px solid var(--line);background:white;padding:10px}.how-read-item b{font-size:12px;display:block;margin-bottom:4px}.how-read-item .eq{font-family:Georgia,serif;font-size:16px;margin-bottom:3px}.symbol-key{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}.assumption{font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px;font-style:italic}
+.next-step-controls{display:grid;grid-template-columns:1fr 1.15fr 1.35fr;gap:10px;align-items:start;margin-bottom:10px}.next-step-controls .control{min-width:0;margin:0;border:1px solid var(--line);background:white;padding:10px}.field-stage .family-card{position:relative}.field-stage .family-card>div:first-child b{font-size:14px}.arrow-box{font-size:34px;font-weight:300}
+
+.transition-block{border:1px solid var(--line);background:#fff;padding:14px;margin-top:14px}
+.transition-block:first-of-type{margin-top:0}
+.transition-block-head{display:grid;grid-template-columns:minmax(150px,.5fr) minmax(260px,1fr);gap:22px;align-items:end;border-bottom:1px solid #e4e4df;padding-bottom:12px;margin-bottom:14px}
+.transition-block-head.variables-2{grid-template-columns:minmax(150px,.45fr) minmax(220px,.75fr) minmax(260px,1fr);align-items:start}
+.transition-block-head b{display:block;font-size:16px;font-weight:600;letter-spacing:-.015em;margin-top:3px}
+.transition-index{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--time)}
+.transition-variable{margin:0}
+.transition-variable label{margin-bottom:5px}
+.sample-note{font-size:9.5px;color:var(--muted);margin-top:5px;letter-spacing:.02em}
+.trajectory-continuation{display:grid;grid-template-columns:80px 1fr;gap:16px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin-top:18px}
+.trajectory-continuation .ellipsis{font-size:48px;line-height:.7;letter-spacing:.12em;text-align:center;font-weight:300}
+.trajectory-continuation b{display:block;font-size:13px;font-weight:600}
+.trajectory-continuation span{display:block;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:4px;max-width:720px}
+.single-result{max-width:100%}
+
+.transition-sample-btn{margin-top:8px;background:#fff;color:var(--ink);border:1px solid #cfcfca;padding:6px 9px;font-size:9px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.transition-sample-note{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.35}
+
+@media(max-width:900px){.field-stage,.recursive-stage,.transition-block-head,.transition-block-head.variables-2{grid-template-columns:1fr}.arrow-box,.rec-arrow{transform:rotate(90deg);padding:6px}}
+@media(max-width:1200px){.layout{grid-template-columns:1fr}.controls{position:static}}
+@media(max-width:1100px){.grid2{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.step{border-right:0;border-bottom:1px solid var(--line)}.grid3,.future-grid{grid-template-columns:1fr}.state-wrap,.field-stage,.recursive-stage{grid-template-columns:1fr}.arrow-box,.rec-arrow{transform:rotate(90deg);padding:6px}}
+@media(max-width:700px){.program-inputs,.metricstrip,.next-step-controls,.how-read-grid{grid-template-columns:1fr}.state-meta{grid-template-columns:1fr}}
+</style>
+<style id="thesis-unified-ui">
+/* --- Thesis unified interface: common visual language across all three cases --- */
+:root{
+  --bg:#ffffff;
+  --paper:#ffffff;
+  --ink:#161616;
+  --muted:#6c6c68;
+  --line:#d9d9d4;
+  --soft:#f7f7f4;
+  --state:#f07b36;
+  --variables:#3eaa57;
+  --transform:#52a6f2;
+  --family:#a34aa3;
+  --time:#1d1d1d;
+  --shadow:none;
+}
+html,body{background:var(--bg);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+body{padding:24px}
+.app{max-width:1440px;gap:22px}
+.panel{background:var(--paper);border:1px solid var(--line);box-shadow:none}
+header.panel{border:0;border-bottom:1px solid var(--ink);padding:20px 0 18px}
+header .kicker{color:var(--ink);font-size:10px;letter-spacing:.16em}
+h1{font-size:32px;line-height:1.08;letter-spacing:-.035em;font-weight:500}
+.subtitle{margin-top:9px;max-width:960px;font-size:13px;line-height:1.5;color:var(--muted)}
+.steps{margin-top:20px;border-top:1px solid var(--line)}
+.step{padding:10px 12px 8px;border-right:0;border-left:1px solid #ecece8;font-size:11px;color:var(--muted)}
+.step:first-child{border-left:0}
+.step b{font-size:10px;margin-bottom:4px;letter-spacing:.12em}
+.steps .step:nth-child(1) b{color:var(--state)}
+.steps .step:nth-child(2) b{color:var(--variables)}
+.steps .step:nth-child(3) b{color:var(--transform)}
+.steps .step:nth-child(4) b{color:var(--family)}
+.steps .step:nth-child(5) b{color:var(--time)}
+.layout{grid-template-columns:350px minmax(0,1fr);gap:22px}
+.controls{top:18px}
+.controls.panel{background:#fafaf8;border-color:#e1e1dc}
+.controls .inner,.section .inner{padding:18px}
+.control{margin-bottom:17px}
+label{font-size:9.5px;letter-spacing:.09em;line-height:1.3}
+select,input[type=number]{padding:9px 10px;border:1px solid #cfcfca;background:#fff;border-radius:0}
+input[type=range]{accent-color:var(--ink)}
+button{padding:9px 11px;border-radius:0;font-size:11px;letter-spacing:.03em}
+.note{background:transparent;color:var(--muted);border-left:1px solid var(--ink);padding:8px 0 8px 12px;font-size:11px;line-height:1.5}
+.main{gap:22px}
+.grid2{gap:22px}
+.grid3,.future-grid{gap:12px}
+.section{border-color:#dfdfda}
+.section.step-12{border-top:2px solid transparent;border-image:linear-gradient(90deg,var(--state) 0 50%,var(--variables) 50% 100%) 1}
+.section.step-transform{border-top:2px solid var(--transform)}
+.section.step-family{border-top:2px solid var(--family)}
+.section.step-time{border-top:2px solid var(--time)}
+.section-title{padding:11px 16px 10px;border-bottom:1px solid #e4e4df}
+.section-title h2{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.section-title .small{max-width:52%;text-align:right}
+.kicker{font-size:9.5px;letter-spacing:.13em}
+.small{font-size:11px;line-height:1.45}
+.section.step-12 .kicker .n-state{color:var(--state)}
+.section.step-12 .kicker .n-var{color:var(--variables)}
+.section.step-transform .kicker{color:var(--transform)}
+.section.step-family .kicker{color:var(--family)}
+.section.step-time .kicker{color:var(--time)}
+.state-card,.node,.family-card,.facade-box,.metric,.use-card,.how-read-item,.land-use-card,.priority-card,
+.formula-read>div,.water-line{border-color:#deded9;box-shadow:none}
+.family-card,.state-card,.node,.facade-box,.metric,.use-card,.how-read-item{background:#fff}
+.meta{border-top:1px solid #dadad5}
+.meta span{font-size:9px;letter-spacing:.09em}
+.meta b{font-size:12px;font-weight:500}
+.formula{background:#fafaf7;border-color:#deded9;font-size:16px}
+.same-horizon{background:transparent;border-left:1px solid var(--family);padding:8px 0 8px 12px}
+.rule-card{background:transparent;border-color:#deded9}
+.subsection{border-top:1px solid #deded9;padding-top:18px;margin-top:18px}
+.subhead{margin-bottom:12px}
+.subhead b{font-size:12px;font-weight:600}
+.stage-label{font-size:9.5px;letter-spacing:.11em}
+.arrow-box{color:var(--ink);font-weight:300}
+.rec-arrow{color:var(--ink)}
+.method-strip{margin-top:12px;padding-top:10px;border-top:1px solid #deded9;font-size:10.5px;line-height:1.5;color:var(--muted)}
+.method-strip b{color:var(--ink);font-weight:600}
+.method-strip .method-row{display:block;margin-top:2px}
+.design-use{gap:12px}
+.use-card{padding:12px}
+.use-card b{font-size:11px;font-weight:600}
+.use-card p{font-size:10.5px;line-height:1.5}
+.footer{border:0;border-top:1px solid var(--line);padding:10px 0;color:#8a8a84}
+.legend{font-size:10px}
+@media(max-width:1200px){.layout{grid-template-columns:1fr}.controls{position:static}}
+</style>
+<style id="probabilistic-demographic-update">
+.prob-group{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.prob-group:first-of-type{margin-top:0}.prob-group-title{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}.prob-row-edit{display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:center;margin-bottom:6px}.prob-row-edit span{font-size:10px;line-height:1.25}.prob-row-edit input{width:100%;padding:5px 6px;border:1px solid #cfcfca;background:#fff;font-size:10px}.prob-total{font-size:10px;color:var(--muted);text-align:right;margin-top:6px}.prob-total.bad{color:#b53c31;font-weight:700}
+.sampled-box{border:1px solid var(--line);background:#fff;padding:10px}.sampled-box .eyebrow{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.sampled-box h3{font-size:16px;font-weight:600;margin-top:4px;letter-spacing:-.015em}.sampled-box .prob-big{font-size:24px;font-weight:600;letter-spacing:-.04em;margin-top:6px}.sampled-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.sampled-meta>div{border-top:1px solid var(--line);padding-top:6px}.sampled-meta span{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.sampled-meta b{display:block;font-size:10.5px;margin-top:2px}
+.transition-sampled{margin:0;border:1px solid var(--line);background:#fafaf8;padding:9px 10px}.transition-sampled .eyebrow{font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}.transition-sampled b{font-size:12px!important;margin-top:3px!important}.transition-sampled .detail{font-size:9.5px;color:var(--muted);line-height:1.35;margin-top:3px}.transition-sampled .prob{font-size:15px;font-weight:600;color:var(--ink);margin-top:3px}
+.sampled-result-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}.sampled-result-title b{font-size:12px}.sampled-result-title span{font-size:9.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="panel">
+<h1>Case 02 – Design across demographic change and fluctuating occupancy</h1>
+<p class="subtitle">A building-scale demonstrator of the Probabilistic Design Framework.</p>
+<div class="steps">
+<div class="step"><b>01</b>Current state</div>
+<div class="step"><b>02</b>Variables</div>
+<div class="step"><b>03</b>Probabilistic transformation</div>
+<div class="step"><b>04</b>Family of possible states</div>
+<div class="step"><b>05</b>Recursive temporal update</div>
+</div>
+</header>
+<div class="layout">
+<aside class="panel controls">
+<div class="inner">
+<div class="control">
+<label for="initialCells">Current-state attribute · built cells</label>
+<div class="row"><input id="initialCells" max="20" min="1" type="range" value="4"/><span class="value" id="initialCellsVal">4</span></div>
+</div>
+<div class="control">
+<label for="occupancy">Current-state attribute · occupancy</label>
+<div class="row"><input id="occupancy" max="100" min="0" type="range" value="50"/><span class="value" id="occupancyVal">50%</span></div>
+</div>
+<div class="control">
+<label>Current-state attribute · program mix</label>
+<div class="program-inputs">
+<div><label for="mixSchool" style="text-transform:none;letter-spacing:0">School %</label><input id="mixSchool" max="100" min="0" type="number" value="50"/></div>
+<div><label for="mixOffice" style="text-transform:none;letter-spacing:0">Office %</label><input id="mixOffice" max="100" min="0" type="number" value="25"/></div>
+<div><label for="mixSenior" style="text-transform:none;letter-spacing:0">Senior Residence %</label><input id="mixSenior" max="100" min="0" type="number" value="25"/></div>
+</div>
+<div class="program-sum" id="mixSum"></div>
+</div>
+<div class="control">
+<label for="populationChange1">External variable · population change · T0 → T1</label>
+<div class="row"><input id="populationChange1" max="200" min="-100" type="range" value="150"/><span class="value" id="populationChange1Val">+150%</span></div>
+</div>
+<div class="control">
+<label for="demographicProfile1">External variable · demographic profile · T0 → T1</label>
+<div class="row"><input id="demographicProfile1" max="100" min="0" type="range" value="5"/><span class="value" id="demographicProfile1Val">5</span></div>
+<div class="profile-axis"><span>Children</span><span>Working-age</span><span>Older adults</span></div>
+</div>
+<div class="control">
+<label for="seed">Stochastic sampling seed</label>
+<input id="seed" type="number" value="21"/>
+<button class="secondary" id="sampleTransition1" style="width:100%;margin-top:8px">Sample from probabilities</button>
+<div class="transition-sample-note" id="sampleTransition1Note"></div>
+</div>
+<div class="buttonrow">
+<button id="run">Update</button>
+<button class="secondary" id="random">New seed</button>
+</div>
+<div style="height:12px"></div>
+<div class="note"><b>Methodological note. </b>Each built cell contains four quarter-cell program slots. Demographic variables are adjusted directly with sliders; optional sampling uses the illustrative demographic probability set embedded in the demonstrator.</div>
+</div>
+</aside>
+<main class="main">
+<div class="grid2">
+<section class="panel section step-12">
+<div class="section-title">
+<div><div class="kicker"><span class="n-state">01</span> + <span class="n-var">02</span></div><h2>Current state + variables</h2></div>
+<div class="small">building state at T0 + possible demographic conditions</div>
+</div>
+<div class="inner state-wrap">
+<div>
+<div class="state-card" id="initialStateCard"></div>
+<div class="legend-large">
+<div class="legend-large-title">Program legend</div>
+<div class="leg"><span class="dot" style="background:var(--school)"></span><div><strong>School</strong><small>green</small></div></div>
+<div class="leg"><span class="dot" style="background:var(--office)"></span><div><strong>Office</strong><small>blue</small></div></div>
+<div class="leg"><span class="dot" style="background:var(--senior)"></span><div><strong>Senior Residence</strong><small>brown</small></div></div>
+<div class="leg"><span class="dot" style="background:var(--vacant)"></span><div><strong>Vacant built capacity</strong><small>empty / unoccupied quarter-cell</small></div></div>
+</div>
+</div>
+<div>
+<div class="state-meta">
+<div class="meta"><span>Built cells</span><b id="metaCells">4</b></div>
+<div class="meta"><span>Occupied equivalent</span><b id="metaOccupied">2.00 cells</b></div>
+<div class="meta"><span>Occupancy</span><b id="metaOccupancy">50%</b></div>
+<div class="meta"><span>Resolution</span><b>¼ cell</b></div>
+<div class="meta"><span>School</span><b id="metaSchool">1.00 cells</b></div>
+<div class="meta"><span>Office</span><b id="metaOffice">0.50 cells</b></div>
+<div class="meta"><span>Senior Residence</span><b id="metaSenior">0.50 cells</b></div>
+<div class="meta"><span>Vacant capacity</span><b id="metaVacant">2.00 cells</b></div>
+</div>
+</div>
+</div>
+</section>
+<section class="panel section step-transform">
+<div class="section-title">
+<div><div class="kicker">03</div><h2>Probabilistic transformation</h2></div>
+<div class="small">demographic scenarios → probability → sampled outcome → program demand</div>
+</div>
+<div class="inner tree">
+<div class="formula">P(S<sub>i</sub>) → S<sub>sampled</sub>   ·   ΔD = D<sub>t</sub> × g   ·   ΔD<sub>i</sub> = ΔD × w<sub>i</sub>(V<sub>t</sub>)</div>
+<div class="tree-root">
+<div class="sampled-box" id="sampledScenario"></div>
+<div class="branches" id="demandBranches"></div>
+</div>
+<div class="metricstrip" id="demandMetrics"></div>
+<div class="how-read">
+<div class="how-read-title">How to read the model</div>
+<div class="how-read-grid">
+<div class="how-read-item"><b>1 · Sample demographic future</b><div class="small">One demographic outcome is selected according to the assigned probability distribution.</div></div>
+<div class="how-read-item"><b>2 · Translate into spatial demand</b><div class="small">Its population change and demographic profile determine the amount and distribution of program demand.</div></div>
+</div>
+<div class="assumption">The probabilistic component operates at the level of demographic change; spatial allocation is deterministic once the demographic outcome has been sampled.</div>
+</div>
+<div class="method-strip"><span class="method-row"><b>Transformation set · </b>occupy vacant capacity · expand by adding cells · vacate space</span></div>
+</div>
+</section>
+</div>
+<section class="panel section step-family">
+<div class="section-title">
+<div><div class="kicker">04</div><h2>Family of possible states</h2></div>
+<div class="small">one sampled demographic future · one realized building state</div>
+</div>
+<div class="inner">
+<div class="field-stage">
+<div>
+<div class="stage-label">Current building · T0</div>
+<div class="state-card" id="currentField"></div>
+</div>
+<div class="arrow-box">→</div>
+<div>
+<div class="stage-label" id="t1ResultLabel">Sampled building state · T1</div>
+<div class="single-result" id="futureField"></div>
+</div>
+</div>
+<div class="same-horizon" id="t1Note"><b>T0 → T1 samples one demographic outcome.</b> The corresponding demand is translated into one building state. Re-sampling may materialize another demographic future and therefore another possible state.</div>
+</div>
+</section>
+<section class="panel section step-time">
+<div class="section-title">
+<div><div class="kicker">05</div><h2>Recursive temporal update</h2></div>
+<div class="small">each realized state becomes the current state for the next sampled transition</div>
+</div>
+<div class="inner"><div class="subsection">
+<div class="subhead"><div><b>Observed state → adjustable demographic variables → new state</b><div class="small">each realized building state is inherited; the demographic variables can then be adjusted for the next transition</div></div></div>
+
+<div class="transition-block">
+<div class="transition-block-head variables-2">
+<div><span class="transition-index">Transition 02</span><b>T1 → T2</b><button class="transition-sample-btn" id="sampleTransition2">Sample from probabilities</button><div class="transition-sample-note" id="sampleTransition2Note"></div></div>
+<div class="control transition-variable">
+<label for="populationChange2">External variable · population change · T1 → T2</label>
+<div class="row"><input id="populationChange2" max="200" min="-100" type="range" value="-60"/><span class="value" id="populationChange2Val">-60%</span></div>
+</div>
+<div class="control transition-variable">
+<label for="demographicProfile2">External variable · demographic profile · T1 → T2</label>
+<div class="row"><input id="demographicProfile2" max="100" min="0" type="range" value="95"/><span class="value" id="demographicProfile2Val">95</span></div>
+<div class="profile-axis"><span>Children</span><span>Working-age</span><span>Older adults</span></div>
+</div>
+</div>
+<div class="recursive-stage">
+<div><div class="stage-label">Observed state · T1</div><div class="state-card" id="observedField"></div></div>
+<div class="rec-arrow"><span>becomes the new<br/>current state</span><strong>→</strong><span>apply next variables</span></div>
+<div><div class="stage-label" id="t2FamilyLabel">Realized state · T2</div><div class="state-card" id="t2Field"></div><div class="sample-note">demographic variables translated into the next building state</div></div>
+</div>
+</div>
+
+<div class="transition-block">
+<div class="transition-block-head variables-2">
+<div><span class="transition-index">Transition 03</span><b>T2 → T3</b><button class="transition-sample-btn" id="sampleTransition3">Sample from probabilities</button><div class="transition-sample-note" id="sampleTransition3Note"></div></div>
+<div class="control transition-variable">
+<label for="populationChange3">External variable · population change · T2 → T3</label>
+<div class="row"><input id="populationChange3" max="200" min="-100" type="range" value="180"/><span class="value" id="populationChange3Val">+180%</span></div>
+</div>
+<div class="control transition-variable">
+<label for="demographicProfile3">External variable · demographic profile · T2 → T3</label>
+<div class="row"><input id="demographicProfile3" max="100" min="0" type="range" value="50"/><span class="value" id="demographicProfile3Val">50</span></div>
+<div class="profile-axis"><span>Children</span><span>Working-age</span><span>Older adults</span></div>
+</div>
+</div>
+<div class="recursive-stage">
+<div><div class="stage-label">Observed state · T2</div><div class="state-card" id="t2InheritedField"></div></div>
+<div class="rec-arrow"><span>becomes the new<br/>current state</span><strong>→</strong><span>apply next variables</span></div>
+<div><div class="stage-label" id="t3FamilyLabel">Realized state · T3</div><div class="state-card" id="t3Field"></div><div class="sample-note">demographic variables translated into the next building state</div></div>
+</div>
+</div>
+
+<div class="trajectory-continuation">
+<div class="ellipsis">…</div>
+<div><b>T3 → T4 → … → Tn</b><span>The same recursive process can continue for as many successive states as required: redefine the demographic variables, update demand, transform the inherited building state, and repeat.</span></div>
+</div>
+</div></div>
+</section>
+<section class="panel footer">Probabilistic Design Framework · building-scale demonstrator · Case 02</section>
+</main>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const COLORS={school:'#9aae78',office:'#6f8792',senior:'#b98352',vacant:'#f4f1ec'};
+const SCENARIOS=[
+ {key:'family_growth',group:'Growth',name:'Family-led growth',p:6,change:25,profile:10},
+ {key:'working_growth',group:'Growth',name:'Working-age-led growth',p:9,change:15,profile:50},
+ {key:'aging_growth',group:'Growth',name:'Aging-led growth',p:12,change:10,profile:90},
+ {key:'rejuvenating_stable',group:'Stable',name:'Rejuvenating stable',p:1,change:0,profile:15},
+ {key:'balanced_stable',group:'Stable',name:'Balanced stable',p:1,change:0,profile:50},
+ {key:'aging_stable',group:'Stable',name:'Aging stable',p:2,change:0,profile:90},
+ {key:'aging_decline',group:'Decline',name:'Aging decline',p:36,change:-12,profile:90},
+ {key:'working_decline',group:'Decline',name:'Working-age decline',p:20,change:-16,profile:50},
+ {key:'broad_decline',group:'Decline',name:'Broad decline',p:13,change:-20,profile:50}
+];
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function normWeights(arr){const clean=arr.map(v=>Math.max(0,+v||0)),s=clean.reduce((a,b)=>a+b,0);return s?clean.map(v=>v/s):[1/3,1/3,1/3]}
+function largestRemainder(total,weights){if(total<=0)return weights.map(()=>0);const raw=weights.map(w=>w*total),base=raw.map(Math.floor);let rem=total-base.reduce((a,b)=>a+b,0);const order=raw.map((v,i)=>({i,r:v-base[i]})).sort((a,b)=>b.r-a.r);for(let k=0;k<rem;k++)base[order[k%order.length].i]++;return base}
+function inputMix(){return normWeights([+$('mixSchool').value,+$('mixOffice').value,+$('mixSenior').value])}
+function demographicWeights(p){p=clamp(+p,0,100);if(p<=50)return [1-p/50,p/50,0];return [0,1-(p-50)/50,(p-50)/50]}
+function profileText(p){p=+p;if(p<=15)return 'child-dominant';if(p<40)return 'children + working-age';if(p<=60)return 'working-age-dominant';if(p<85)return 'working-age + older-adult';return 'older-adult-dominant'}
+function initialPositions(n){const cols=Math.ceil(Math.sqrt(n)),rows=Math.ceil(n/cols),out=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(out.length<n)out.push({x:c,y:r})}const cx=(cols-1)/2,cy=(rows-1)/2;return out.map(p=>({x:p.x-cx,y:p.y-cy}))}
+function blankCell(x,y){return{x,y,slots:['vacant','vacant','vacant','vacant']}}
+function slotRefs(state,fn=()=>true){const out=[];state.cells.forEach((cell,ci)=>cell.slots.forEach((v,si)=>{if(fn(v,cell,si))out.push({ci,si,cell})}));return out}
+function assignInitialPrograms(state,counts){const progs=['school','office','senior'];let refs=slotRefs(state,v=>v==='vacant'),idx=0;progs.forEach((p,pi)=>{for(let i=0;i<counts[pi]&&idx<refs.length;i++,idx++)state.cells[refs[idx].ci].slots[refs[idx].si]=p})}
+function makeInitialState(){const n=+$('initialCells').value,occ=+$('occupancy').value/100,total=n*4,occupied=Math.round(total*occ),counts=largestRemainder(occupied,inputMix()),cells=initialPositions(n).map(p=>blankCell(p.x,p.y));const state={cells};assignInitialPrograms(state,counts);return state}
+function cloneState(s){return{cells:s.cells.map(c=>({x:c.x,y:c.y,slots:[...c.slots]}))}}
+function key(x,y){return `${x},${y}`}
+function frontier(state){const set=new Set(state.cells.map(c=>key(c.x,c.y))),cand=new Map(),dirs=[[1,0],[-1,0],[0,1],[0,-1]];state.cells.forEach(c=>dirs.forEach(([dx,dy])=>{const x=c.x+dx,y=c.y+dy,k=key(x,y);if(!set.has(k))cand.set(k,{x,y})}));return [...cand.values()]}
+function addCells(state,count){for(let i=0;i<count;i++){const set=new Set(state.cells.map(c=>key(c.x,c.y))),f=frontier(state);if(!f.length)break;f.forEach(p=>{p.neigh=[[1,0],[-1,0],[0,1],[0,-1]].reduce((s,[dx,dy])=>s+(set.has(key(p.x+dx,p.y+dy))?1:0),0);p.dist=Math.abs(p.x)+Math.abs(p.y)});f.sort((a,b)=>b.neigh-a.neigh||a.dist-b.dist||a.y-b.y||a.x-b.x);state.cells.push(blankCell(f[0].x,f[0].y))}}
+function allocatePositive(state,totalAdd,weights){let vacant=slotRefs(state,v=>v==='vacant').length;if(totalAdd>vacant)addCells(state,Math.ceil((totalAdd-vacant)/4));const counts=largestRemainder(totalAdd,weights),progs=['school','office','senior'];progs.forEach((prog,pi)=>{const refs=slotRefs(state,v=>v==='vacant');refs.slice(0,counts[pi]).forEach(r=>state.cells[r.ci].slots[r.si]=prog)})}
+function allocateNegative(state,totalRemove,weights){const counts=largestRemainder(totalRemove,weights),progs=['school','office','senior'];let residual=0;progs.forEach((prog,pi)=>{const refs=slotRefs(state,v=>v===prog).reverse(),take=Math.min(counts[pi],refs.length);refs.slice(0,take).forEach(r=>state.cells[r.ci].slots[r.si]='vacant');residual+=counts[pi]-take});if(residual>0)slotRefs(state,v=>v!=='vacant').reverse().slice(0,residual).forEach(r=>state.cells[r.ci].slots[r.si]='vacant')}
+function occupiedSlots(state){return slotRefs(state,v=>v!=='vacant').length}
+function evolveScenario(start,sc){
+  const state=cloneState(start),current=occupiedSlots(state);
+  const target=Math.max(0,Math.round(current*(1+sc.change/100)));
+  const weights=demographicWeights(sc.profile);
+  let capacity=state.cells.length*4;
+  if(target>capacity){addCells(state,Math.ceil((target-capacity)/4));capacity=state.cells.length*4;}
+  const desired=largestRemainder(Math.min(target,capacity),weights);
+  const prog=['school','office','senior'],kept={school:0,office:0,senior:0};
+  state.cells.forEach(cell=>cell.slots.forEach((v,i)=>{
+    if(v!=='vacant' && kept[v]<desired[prog.indexOf(v)]){kept[v]++;}
+    else cell.slots[i]='vacant';
+  }));
+  prog.forEach((p,pi)=>{
+    let need=desired[pi]-kept[p];
+    if(need<=0)return;
+    for(const cell of state.cells){for(let i=0;i<cell.slots.length&&need>0;i++)if(cell.slots[i]==='vacant'){cell.slots[i]=p;need--;}}
+  });
+  return state;
+}
+function counts(state){const c={school:0,office:0,senior:0,vacant:0};state.cells.forEach(cell=>cell.slots.forEach(s=>c[s]++));return c}
+function eq(n){return (n/4).toFixed(2)}
+function summary(state){const c=counts(state),occ=c.school+c.office+c.senior,total=state.cells.length*4;return `${state.cells.length} built cells · ${eq(occ)} occupied · ${Math.round(occ/total*100)}% occupancy`}
+function programSummary(state){const c=counts(state);return `School ${eq(c.school)} · Office ${eq(c.office)} · Senior ${eq(c.senior)} · Vacant ${eq(c.vacant)}`}
+function stateSVG(state){const xs=state.cells.map(c=>c.x),ys=state.cells.map(c=>c.y),minX=Math.min(...xs)-1,maxX=Math.max(...xs)+1,minY=Math.min(...ys)-1,maxY=Math.max(...ys)+1,cell=72,gap=6,pad=12,W=(maxX-minX+1)*(cell+gap)+pad*2,H=(maxY-minY+1)*(cell+gap)+pad*2;let s=`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fbfaf7"/>`;for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const px=pad+(x-minX)*(cell+gap),py=pad+(y-minY)*(cell+gap);s+=`<rect x="${px}" y="${py}" width="${cell}" height="${cell}" fill="none" stroke="#ddd8d1" stroke-dasharray="3 4"/>`}state.cells.forEach(c=>{const px=pad+(c.x-minX)*(cell+gap),py=pad+(c.y-minY)*(cell+gap),half=cell/2;c.slots.forEach((prog,i)=>{const sx=px+(i%2)*half,sy=py+Math.floor(i/2)*half;s+=`<rect x="${sx}" y="${sy}" width="${half}" height="${half}" fill="${COLORS[prog]}" stroke="#fff" stroke-width="1"/>`});s+=`<rect x="${px}" y="${py}" width="${cell}" height="${cell}" fill="none" stroke="#3f3b37" stroke-width="2"/>`});return s+'</svg>'}
+function normalizedProbabilities(){const vals=SCENARIOS.map(sc=>Math.max(0,+sc.p||0)),sum=vals.reduce((a,b)=>a+b,0)||1;return vals.map(v=>v/sum)}
+function sampleScenario(seedOffset=0){const probs=normalizedProbabilities(),rng=mulberry32((+$('seed').value||1)+seedOffset*7919);let r=rng();for(let i=0;i<SCENARIOS.length;i++){r-=probs[i];if(r<=0)return {...SCENARIOS[i],pDisplay:probs[i]*100}}return {...SCENARIOS[SCENARIOS.length-1],pDisplay:probs.at(-1)*100}}
+let initialState=null,sc1=null,sc2=null,sc3=null,t1State=null,t2State=null,t3State=null;
+function renderInputs(){const sum=(+$('mixSchool').value||0)+(+$('mixOffice').value||0)+(+$('mixSenior').value||0);$('initialCellsVal').textContent=$('initialCells').value;$('occupancyVal').textContent=$('occupancy').value+'%';$('mixSum').innerHTML=`Input weights: ${sum}% · internally normalized${sum!==100?' <span class="warning">(not 100%)</span>':''}`;const ch=+$('populationChange1').value,p=+$('demographicProfile1').value;$('populationChange1Val').textContent=(ch>0?'+':'')+ch+'%';$('demographicProfile1Val').textContent=p}
+function renderInitial(){initialState=makeInitialState();$('initialStateCard').innerHTML=stateSVG(initialState);$('currentField').innerHTML=stateSVG(initialState)+`<div class="summaryline" style="margin-top:5px">${summary(initialState)}<br>${programSummary(initialState)}</div>`;const c=counts(initialState),occ=c.school+c.office+c.senior;$('metaCells').textContent=initialState.cells.length;$('metaOccupied').textContent=eq(occ)+' cells';$('metaOccupancy').textContent=Math.round(occ/(initialState.cells.length*4)*100)+'%';$('metaSchool').textContent=eq(c.school)+' cells';$('metaOffice').textContent=eq(c.office)+' cells';$('metaSenior').textContent=eq(c.senior)+' cells';$('metaVacant').textContent=eq(c.vacant)+' cells'}
+function scenarioBox(sc){const sampled=sc.pDisplay!=null;return `<div class="eyebrow">${sampled?'Sampled demographic outcome':'Selected demographic condition'}</div><h3>${sc.name}</h3>${sampled?`<div class="prob-big">${Math.round(sc.pDisplay)}%</div>`:''}<div class="sampled-meta"><div><span>Population change</span><b>${sc.change>0?'+':''}${sc.change}%</b></div><div><span>Demographic profile</span><b>${profileText(sc.profile)}</b></div></div>`}
+function demandInfo(sc,start){const current=occupiedSlots(start)/4,delta=current*sc.change/100,target=Math.max(0,current+delta),capacity=start.cells.length,short=Math.max(0,target-capacity),w=demographicWeights(sc.profile);return {current,delta,target,short,w}}
+function renderTransform(){const change=+$('populationChange1').value,profile=+$('demographicProfile1').value;sc1=variableScenario(change,profile,sc1SampleName||'User-defined demographic condition');if(sc1SampleProbability!=null){sc1.pDisplay=sc1SampleProbability}else{sc1.pDisplay=null}const d=demandInfo(sc1,initialState);$('sampledScenario').innerHTML=scenarioBox(sc1);const data=[['School',d.w[0],COLORS.school],['Office',d.w[1],COLORS.office],['Senior Residence',d.w[2],COLORS.senior]];$('demandBranches').innerHTML=data.map(([lab,val,col])=>`<div class="branch"><span>${lab}</span><span class="bar"><span class="fill" style="width:${val*100}%;background:${col}"></span></span><b>${Math.round(val*100)}%</b></div>`).join('');$('demandMetrics').innerHTML=`<div class="metric"><span>Current demand</span><b>${d.current.toFixed(2)}</b></div><div class="metric"><span>Demand change</span><b>${d.delta>=0?'+':''}${d.delta.toFixed(2)}</b></div><div class="metric"><span>Target demand</span><b>${d.target.toFixed(2)}</b></div><div class="metric"><span>New capacity required</span><b>${d.short.toFixed(2)}</b></div>`}
+function stateCard(title,state,tag=''){return `<div class="family-card"><div class="sampled-result-title"><b>${title}</b><span>${tag}</span></div>${stateSVG(state)}<div class="summaryline">${summary(state)}<br>${programSummary(state)}</div></div>`}
+function renderFamily(){t1State=evolveScenario(initialState,sc1);const sampled=sc1.pDisplay!=null;$('t1ResultLabel').textContent=`Realized building state · T1 · ${sc1.name}`;$('futureField').innerHTML=stateCard('Realized path',t1State,sampled?`${sc1.pDisplay.toFixed(1)}%`:'T1');$('t1Note').innerHTML=sampled?`<b>T0 → T1 sampled ${sc1.name}.</b> This demographic outcome (${sc1.pDisplay.toFixed(1)}%) changes population by ${sc1.change>0?'+':''}${sc1.change}% and produces the building state shown. Re-sampling may materialize another demographic future and therefore another possible state.`:`<b>T0 → T1 uses the selected demographic condition.</b> Population change and demographic profile are adjusted directly with the sliders; the resulting demand produces the building state shown.`}
+function variableScenario(change,profile,name='User-defined demographic condition'){return {name,change:+change,profile:+profile,pDisplay:null}}
+let sc1SampleName=null,sc1SampleProbability=null,transitionSampleCounter1=0;
+let transitionSampleCounter2=0,transitionSampleCounter3=0;
+function setInitialFromSample(){const sc=sampleScenario(1+transitionSampleCounter1++*1007);$('populationChange1').value=sc.change;$('demographicProfile1').value=sc.profile;sc1SampleName=sc.name;sc1SampleProbability=sc.pDisplay;$('sampleTransition1Note').textContent=`Sampled: ${sc.name} · ${Math.round(sc.pDisplay)}%`;renderAll()}
+function clearInitialSample(){sc1SampleName=null;sc1SampleProbability=null;$('sampleTransition1Note').textContent='Manual demographic condition';}
+function setTransitionFromSample(which){
+  const offset=which===2?101+transitionSampleCounter2++*1009:201+transitionSampleCounter3++*1013;
+  const sc=sampleScenario(offset);
+  $(`populationChange${which}`).value=sc.change;
+  $(`demographicProfile${which}`).value=sc.profile;
+  $(`sampleTransition${which}Note`).textContent=`Sampled: ${sc.name} · ${Math.round(sc.pDisplay)}%`;
+  renderRecursive();
+}
+function renderRecursive(){
+  if(!t1State)return;
+  const change2=+$('populationChange2').value,profile2=+$('demographicProfile2').value;
+  $('populationChange2Val').textContent=(change2>0?'+':'')+change2+'%';
+  $('demographicProfile2Val').textContent=profile2;
+  sc2=variableScenario(change2,profile2);
+  t2State=evolveScenario(t1State,sc2);
+  const change3=+$('populationChange3').value,profile3=+$('demographicProfile3').value;
+  $('populationChange3Val').textContent=(change3>0?'+':'')+change3+'%';
+  $('demographicProfile3Val').textContent=profile3;
+  sc3=variableScenario(change3,profile3);
+  t3State=evolveScenario(t2State,sc3);
+  $('observedField').innerHTML=stateSVG(t1State)+`<div class="summaryline" style="margin-top:5px">${summary(t1State)}<br>${programSummary(t1State)}</div>`;
+  $('t2FamilyLabel').textContent=`Realized state · T2 · ${change2>0?'+':''}${change2}% · ${profileText(profile2)}`;
+  $('t2Field').innerHTML=stateSVG(t2State)+`<div class="summaryline" style="margin-top:5px">${summary(t2State)}<br>${programSummary(t2State)}</div>`;
+  $('t2InheritedField').innerHTML=stateSVG(t2State)+`<div class="summaryline" style="margin-top:5px">${summary(t2State)}<br>${programSummary(t2State)}</div>`;
+  $('t3FamilyLabel').textContent=`Realized state · T3 · ${change3>0?'+':''}${change3}% · ${profileText(profile3)}`;
+  $('t3Field').innerHTML=stateSVG(t3State)+`<div class="summaryline" style="margin-top:5px">${summary(t3State)}<br>${programSummary(t3State)}</div>`;
+}
+function initializeTransitionSamples(){
+  const z=sampleScenario(1),a=sampleScenario(101),b=sampleScenario(201);
+  $('populationChange1').value=z.change;$('demographicProfile1').value=z.profile;sc1SampleName=z.name;sc1SampleProbability=z.pDisplay;$('sampleTransition1Note').textContent=`Initialized from sample: ${z.name} · ${z.pDisplay.toFixed(1)}%`;
+  $('populationChange2').value=a.change;$('demographicProfile2').value=a.profile;$('sampleTransition2Note').textContent=`Initialized from sample: ${a.name} · ${a.pDisplay.toFixed(1)}%`;
+  $('populationChange3').value=b.change;$('demographicProfile3').value=b.profile;$('sampleTransition3Note').textContent=`Initialized from sample: ${b.name} · ${b.pDisplay.toFixed(1)}%`;
+}
+function renderAll(){renderInputs();renderInitial();renderTransform();renderFamily();renderRecursive()}
+$('sampleTransition1Note').textContent='Illustrative manual condition';
+$('sampleTransition2Note').textContent='Illustrative manual condition';
+$('sampleTransition3Note').textContent='Illustrative manual condition';
+['initialCells','occupancy','mixSchool','mixOffice','mixSenior'].forEach(id=>{$(id).addEventListener('input',renderAll);$(id).addEventListener('change',renderAll)});
+['populationChange1','demographicProfile1'].forEach(id=>{$(id).addEventListener('input',()=>{clearInitialSample();renderAll()});$(id).addEventListener('change',()=>{clearInitialSample();renderAll()})});
+['populationChange2','demographicProfile2','populationChange3','demographicProfile3'].forEach(id=>{$(id).addEventListener('input',renderRecursive);$(id).addEventListener('change',renderRecursive)});
+$('seed').addEventListener('change',()=>{initializeTransitionSamples();renderAll()});
+$('sampleTransition1').addEventListener('click',setInitialFromSample);
+$('sampleTransition2').addEventListener('click',()=>setTransitionFromSample(2));
+$('sampleTransition3').addEventListener('click',()=>setTransitionFromSample(3));
+$('run').addEventListener('click',renderAll);
+$('random').addEventListener('click',()=>{$('seed').value=Math.floor(Math.random()*99999);initializeTransitionSamples();renderAll()});
+renderAll();
+</script>
+</body>

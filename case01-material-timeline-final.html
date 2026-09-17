@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Material-scale timeline demonstrator</title>
+<style>
+:root{
+  --bg:#fff;--paper:#fff;--ink:#161616;--muted:#6c6c68;--line:#d9d9d4;--soft:#f7f7f4;
+  --wood:#d1ad7f;--bend:#b98352;--crack:#d35a4b;--weather:#8c7a60;--accent:#1d1d1d;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+body{padding:24px}.app{max-width:1440px;margin:0 auto;display:grid;gap:22px}.panel{background:var(--paper);border:1px solid var(--line)}
+header.panel{border:0;border-bottom:1px solid var(--ink);padding:20px 0 18px}.kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3,p{margin:0}h1{font-size:34px;line-height:1.05;letter-spacing:-.04em;font-weight:500}.subtitle{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:22px;align-items:start}.controls{position:sticky;top:18px;background:#fafaf8}.inner{padding:18px}
+.control{margin-bottom:16px}label{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;line-height:1.3}
+select,input[type=number]{width:100%;padding:9px 10px;border:1px solid #cfcfca;background:#fff;border-radius:0}input[type=range]{width:100%;accent-color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.value{font-weight:700;font-variant-numeric:tabular-nums;min-width:58px;text-align:right}
+button{border:1px solid var(--ink);background:var(--ink);color:#fff;padding:9px 11px;cursor:pointer;font-size:11px;letter-spacing:.03em}.secondary{background:#fff;color:var(--ink)}.buttonrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.note{border-left:1px solid var(--ink);padding:8px 0 8px 12px;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:12px}.note b{color:var(--ink)}
+.main{display:grid;gap:22px}.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:11px 16px 10px;border-bottom:1px solid #e4e4df}.section-title h2{font-size:16px;font-weight:600;letter-spacing:-.015em}.small{font-size:10.5px;color:var(--muted);line-height:1.45}
+.timeline-top{display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center}.yearbig{font-size:44px;font-weight:600;letter-spacing:-.055em}.caption{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.timeline-line{position:relative;height:58px}.timeline-line:before{content:"";position:absolute;left:0;right:0;top:25px;height:1px;background:#a9a9a4}.timeline-marks{display:flex;justify-content:space-between;position:relative;z-index:2}.mark{text-align:center;font-size:9px;color:var(--muted);min-width:44px}.mark i{display:block;width:12px;height:12px;border-radius:50%;background:#eef0ef;border:1px solid #8d8d89;margin:19px auto 5px}.mark.active i{background:#1d1d1d}.mark b{display:block;color:var(--ink);font-size:10px}
+.stage{display:grid;grid-template-columns:minmax(520px,1.4fr) minmax(280px,.72fr);gap:14px;align-items:start}.card{border:1px solid var(--line);background:#fff;padding:12px}.facade-wrap svg{display:block;width:100%;height:auto}.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}.metric{border-top:1px solid var(--line);padding-top:8px}.metric span{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.metric b{display:block;font-size:20px;margin-top:2px;letter-spacing:-.03em}
+.bars{display:grid;gap:10px;margin-top:14px}.bar-row{display:grid;grid-template-columns:95px 1fr 44px;gap:8px;align-items:center;font-size:11px}.bar{height:12px;background:#f5f3ef;border:1px solid var(--line)}.fill{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}.leg{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)}.dot{width:13px;height:13px;border:1px solid var(--line)}
+.snapshots{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.snap{border:1px solid var(--line);padding:8px}.snap-head{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:6px}.snap-head b{font-size:10px;color:var(--ink)}.snap svg{display:block;width:100%;height:auto}.snap-summary{font-size:8.5px;color:var(--muted);line-height:1.35;margin-top:5px}
+.tree-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}.tree-metric{border:1px solid var(--line);padding:10px}.tree-metric span{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.tree-metric b{display:block;margin-top:4px;font-size:18px;letter-spacing:-.03em}
+.method{margin-top:10px;font-size:10px;color:var(--muted);line-height:1.5}.method b{color:var(--ink)}
+
+.tree-stage.recursive-tree{position:relative;border:1px solid var(--line);background:#fbfaf7;overflow:hidden;padding:16px}
+.tree-stage.recursive-tree svg{width:100%;height:100%;display:block}
+.tree-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}.tree-legend .leg{font-size:10px}
+
+@media(max-width:1150px){.layout{grid-template-columns:1fr}.controls{position:static}.stage{grid-template-columns:1fr}.snapshots{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){body{padding:12px}.timeline-top{grid-template-columns:1fr}.snapshots{grid-template-columns:repeat(2,1fr)}.tree-metrics{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="panel">
+  <div class="kicker">Probabilistic Design Framework · Material demonstrator</div>
+  <h1>Material-scale timeline demonstrator</h1>
+  <p class="subtitle">A time-based facade evolution demonstrator using the Case 01 timber-shingle transition model.</p>
+</header>
+<div class="layout">
+<aside class="panel controls"><div class="inner">
+  <div class="control"><label for="yearSlider">Simulation year T</label><div class="row"><input id="yearSlider" type="range" min="0" max="50" step="1" value="0"><span id="yearVal" class="value">0</span></div></div>
+  <div class="control"><label for="speed">Animation speed</label><div class="row"><input id="speed" type="range" min="80" max="700" step="20" value="140"><span id="speedVal" class="value">0.14 s</span></div></div>
+  <div class="buttonrow"><button id="play">Play</button><button id="reset" class="secondary">Reset</button></div>
+  <div class="control" style="margin-top:18px"><label for="horizon">Time horizon</label><select id="horizon"><option value="20">20 years</option><option value="30">30 years</option><option value="50" selected>50 years</option><option value="75">75 years</option><option value="100">100 years</option></select></div>
+  <div class="control"><label for="interval">Simulation update interval</label><select id="interval"><option value="1">1 year</option><option value="2">2 years</option><option value="5" selected>5 years</option><option value="10">10 years</option></select></div>
+  <div class="control"><label for="grain">Grain orientation</label><select id="grain"><option value="vertical">Vertical grain · A-series</option><option value="horizontal">Horizontal grain · B-series</option></select></div>
+  <div class="control"><label for="fixing">Fixing configuration</label><select id="fixing"></select></div>
+  <div class="control"><label for="condition">Initial material condition</label><select id="condition"><option value="clean">Clean / intact</option><option value="bent">Already bent</option><option value="cracked">Already cracked</option><option value="weathered">Surface weathered</option></select></div>
+  <div class="control"><label for="moisture">Moisture exposure</label><div class="row"><input id="moisture" type="range" min="0" max="100" step="1" value="55"><span id="moistureVal" class="value">55%</span></div></div>
+  <div class="control"><label for="field">Facade grid</label><select id="field"><option value="8">8 × 8</option><option value="10" selected>10 × 10</option><option value="12">12 × 12</option></select></div>
+  <div class="control"><label for="seed">Stochastic seed</label><input id="seed" type="number" value="21"></div>
+  <div class="buttonrow"><button id="update">Update</button><button id="random" class="secondary">New seed</button></div>
+
+</div></aside>
+<main class="main">
+<section class="panel">
+  <div class="section-title"><div><h2>Forward material aging scenario</h2></div><div class="small" id="scenarioLabel">T0 → T50 · update every 5 years</div></div>
+  <div class="inner"><div class="timeline-top"><div><div class="caption">Current simulated year</div><div class="yearbig" id="yearBig">T0</div></div><div class="timeline-line"><div class="timeline-marks" id="timelineMarks"></div></div></div></div>
+</section>
+<section class="panel">
+  <div class="section-title"><div><h2>Facade state through time</h2></div><div class="small">recursive stochastic update · weathered shingles are terminal</div></div>
+  <div class="inner stage">
+    <div class="card facade-wrap"><div class="caption">Architectural field</div><div id="facade"></div><div class="legend"><span class="leg"><span class="dot" style="background:var(--wood)"></span>clean</span><span class="leg"><span class="dot" style="background:var(--bend)"></span>bent</span><span class="leg"><span class="dot" style="background:var(--crack)"></span>cracked</span><span class="leg"><span class="dot" style="background:var(--weather)"></span>weathered</span></div></div>
+    <div style="display:grid;gap:14px">
+      <div class="card"><div class="caption">Key metrics</div><div class="metrics" id="metrics"></div><div class="bars" id="stateBars"></div></div>
+      <div class="card"><div class="caption">Current experiment settings</div><div id="settingsSummary" class="small" style="margin-top:8px;line-height:1.7"></div></div>
+    </div>
+  </div>
+</section>
+<section class="panel">
+  <div class="section-title"><div><h2>Facade evolution</h2></div><div class="small">six snapshots across the selected horizon</div></div>
+  <div class="inner"><div class="snapshots" id="snapshots"></div></div>
+</section>
+<section class="panel">
+  <div class="section-title"><div><h2>Probability Tree</h2></div><div class="small">recursive transition tree across successive update steps</div></div>
+  <div class="inner">
+    <div class="tree-metrics"><div class="tree-metric"><span>Fixing</span><b id="treeFix">A8</b></div><div class="tree-metric"><span>Moisture</span><b id="treeMoist">55%</b></div><div class="tree-metric"><span>Update interval</span><b id="treeInterval">5 years</b></div><div class="tree-metric"><span>Displayed depth</span><b id="treeDepth">4 updates</b></div></div>
+    <div class="tree-stage recursive-tree" id="treeStage"></div>
+    <div class="tree-legend"><div class="leg"><span class="dot" style="background:#efe7d8"></span>clean / intact</div><div class="leg"><span class="dot" style="background:#b98352"></span>bent</div><div class="leg"><span class="dot" style="background:#d8a27b"></span>cracked</div><div class="leg"><span class="dot" style="background:#8c7a60"></span>weathered</div></div>
+    <div class="method"><b>Probability basis.</b> This recursive tree unfolds the same transition matrix over successive update steps. Probabilities do not change by period; what changes is the state inherited at each step, so the branching structure still evolves through time.</div>
+  </div>
+</section>
+<div class="small" style="padding:0 2px 10px">Probabilistic Design Framework · illustrative material timeline demonstrator · Case 01</div>
+</main>
+</div>
+</div>
+<script>
+const FIXINGS={
+A1:{pins:[[.12,.06],[.88,.06]],desc:'two top-corner fixings'},A2:{pins:[[.12,.06],[.88,.06],[.12,.94],[.88,.94]],desc:'four corner fixings'},A3:{pins:[[.50,.06]],desc:'single top-center fixing'},A4:{pins:[[.50,.06],[.50,.94]],desc:'top-center and bottom-center fixings'},A5:{pins:[[.12,.50],[.88,.50]],desc:'two mid-side fixings'},A6:{pins:[[.50,.06],[.12,.94],[.88,.94]],desc:'top-center with two bottom-corner fixings'},A7:{pins:[[.12,.06],[.88,.94]],desc:'top-left and bottom-right fixings'},A8:{pins:[[.12,.06],[.88,.06],[.12,.94]],desc:'top corners with one bottom-left fixing'},A9:{pins:[[.50,.50]],desc:'single central fixing'},A10:{pins:[[.50,.94]],desc:'single bottom-center fixing'},A11:{pins:[[.12,.94],[.88,.94]],desc:'two bottom-corner fixings'},A12:{pins:[[.12,.06],[.50,.50],[.88,.94]],desc:'top-left, center and bottom-right fixings'},
+B1:{pins:[[.12,.06],[.88,.06]],desc:'two top-corner fixings'},B2:{pins:[[.12,.06],[.88,.06],[.12,.94],[.88,.94]],desc:'four corner fixings'},B3:{pins:[[.50,.06]],desc:'single top-center fixing'},B4:{pins:[[.50,.06],[.50,.94]],desc:'top-center and bottom-center fixings'},B5:{pins:[[.12,.50],[.88,.50]],desc:'two mid-side fixings'},B6:{pins:[[.50,.06],[.12,.94],[.88,.94]],desc:'top-center with two bottom-corner fixings'},B7:{pins:[[.12,.06],[.88,.94]],desc:'top-left and bottom-right fixings'},B8:{pins:[[.12,.06],[.88,.06],[.12,.94]],desc:'top corners with one bottom-left fixing'},B9:{pins:[[.50,.50]],desc:'single central fixing'},B10:{pins:[[.50,.94]],desc:'single bottom-center fixing'},B11:{pins:[[.12,.94],[.88,.94]],desc:'two bottom-corner fixings'},B12:{pins:[[.12,.06],[.50,.50],[.88,.94]],desc:'top-left, center and bottom-right fixings'}
+};
+const COLORS={clean:'#d1ad7f',bent:'#b98352',cracked:'#d35a4b',weathered:'#8c7a60'};
+const $=id=>document.getElementById(id); let timer=null,series=[];
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function norm(d){let s=Object.values(d).reduce((a,b)=>a+b,0)||1,o={};Object.entries(d).forEach(([k,v])=>o[k]=v/s);return o}
+function fixingBase(fixKey,grain){const pins=FIXINGS[fixKey].pins,n=pins.length;let top=0,bottom=0,center=0,left=0,right=0;pins.forEach(([x,y])=>{if(y<.18)top++;if(y>.82)bottom++;if(x>.35&&x<.65&&y>.35&&y<.65)center++;if(x<.2)left++;if(x>.8)right++});let base={stable:.63,bend:.12,vcrack:.10,hcrack:.10,weather:.05};if(n===4){base.stable+=.08;base.bend-=.03;base.vcrack-=.02;base.hcrack-=.02}if(n===1){base.stable-=.08;base.bend+=.04;base.vcrack+=.02;base.hcrack+=.02}if(n===2&&top===2){base.bend+=.04;base.stable-=.03}if(n===2&&bottom===2){base.bend+=.03;base.stable-=.03}if(n===2&&center===0&&((top===1&&bottom===1)||(left===1&&right===1)))base.stable+=.01;if(center>0){base.stable-=.02;base.bend+=.01;base.weather+=.01}if((top>0&&bottom>0)&&(left>0&&right>0))base.stable+=.03;if(grain==='vertical'){base.vcrack+=.06;base.hcrack-=.03;if(left+right>=3)base.vcrack+=.02;if(center>0&&n===1){base.vcrack+=.02;base.stable-=.02}}else{base.hcrack+=.06;base.vcrack-=.03;if(top+bottom>=3)base.hcrack+=.02;if(center>0&&n===1){base.hcrack+=.02;base.stable-=.02}}base.weather=Math.max(.03,base.weather);base.bend=Math.max(.04,base.bend);base.vcrack=Math.max(.02,base.vcrack);base.hcrack=Math.max(.02,base.hcrack);base.stable=Math.max(.20,base.stable);return norm(base)}
+function transitionDistribution(condition='clean'){if(condition==='weathered')return{stable:0,bend:0,vcrack:0,hcrack:0,weather:1};const fix=$('fixing').value,grain=$('grain').value,m=+$('moisture').value/100;let d={...fixingBase(fix,grain)},boost=.55+.95*m;d.bend*=boost;d.vcrack*=boost;d.hcrack*=boost;d.weather*=.35+1.6*m;d.stable*=1.35-.85*m;if(condition==='bent'){d.bend*=.15;d.vcrack*=1.45;d.hcrack*=1.45;d.weather*=1.2;d.stable*=.85}if(condition==='cracked'){d.vcrack*=.25;d.hcrack*=.25;d.bend*=1.25;d.weather*=1.55;d.stable*=.8}return norm(d)}
+function weightedChoice(d,rng){let r=rng();for(const [k,p] of Object.entries(d)){r-=p;if(r<=0)return k}return'stable'}
+function initialCell(){const c=$('condition').value,g=$('grain').value;return{bent:c==='bent',vcrack:c==='cracked'&&g==='vertical',hcrack:c==='cracked'&&g==='horizontal',weather:c==='weathered'}}
+function cellCondition(c){if(c.weather)return'weathered';if(c.vcrack||c.hcrack)return'cracked';if(c.bent)return'bent';return'clean'}
+function evolveCell(cell,rng){if(cell.weather)return;const d=transitionDistribution(cellCondition(cell)),o=weightedChoice(d,rng);if(o==='bend')cell.bent=true;if(o==='vcrack')cell.vcrack=true;if(o==='hcrack')cell.hcrack=true;if(o==='weather')cell.weather=true}
+function buildSeries(){const n=+$('field').value,h=+$('horizon').value,interval=+$('interval').value,seed=+$('seed').value||1;let cells=Array.from({length:n*n},()=>({...initialCell()}));series=[cells.map(c=>({...c}))];for(let y=1;y<=h;y++){if(y%interval===0){const rng=mulberry32(seed+y*7919);cells=cells.map(c=>({...c}));cells.forEach(c=>evolveCell(c,rng))}series[y]=cells.map(c=>({...c}))}}
+function facadeSVG(cells,mini=false,seedOffset=0){const n=+$('field').value,W=mini?260:620,H=mini?240:520,pad=mini?8:16,gap=mini?1.4:3,w=(W-pad*2-gap*(n-1))/n,h=w*1.28,step=(H-pad*2-h)/Math.max(1,n-1),rng=mulberry32((+$('seed').value||1)+seedOffset*104729);let s=`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fbfaf7"/>`;cells.forEach((c,i)=>{const r=Math.floor(i/n),col=i%n,x=pad+col*(w+gap),y=pad+r*step;let fill=COLORS.clean;if(c.weather)fill=COLORS.weathered;else if(c.vcrack||c.hcrack)fill='#d8a27b';else if(c.bent)fill=COLORS.bent;const dx=c.bent?(rng()-.5)*(mini?1.2:3):0;s+=`<g transform="translate(${(x+dx).toFixed(1)} ${y.toFixed(1)})"><rect width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}" stroke="#6f5d4f" stroke-width="${mini?.35:.55}"/>`;if(c.vcrack)s+=`<path d="M${(w*.26).toFixed(1)} 2 l-1 ${(h*.35).toFixed(1)} 2 ${(h*.28).toFixed(1)} -1 ${(h*.24).toFixed(1)}" stroke="${COLORS.cracked}" stroke-width="${mini?.8:1.3}" fill="none"/>`;if(c.hcrack)s+=`<path d="M2 ${(h*.48).toFixed(1)} l${(w*.28).toFixed(1)} -1 ${(w*.25).toFixed(1)} 2 ${(w*.25).toFixed(1)} -1" stroke="${COLORS.cracked}" stroke-width="${mini?.8:1.3}" fill="none"/>`;s+='</g>'});return s+'</svg>'}
+function stats(cells){const n=cells.length,c={clean:0,bent:0,cracked:0,weathered:0};cells.forEach(x=>c[cellCondition(x)]++);Object.keys(c).forEach(k=>c[k]=c[k]/n);return c}
+function pct(v){return Math.round(v*100)+'%'}
+const TREE_KEYS=['stable','bend','vcrack','hcrack','weather'];
+const TREE_LABELS={stable:'REMAIN STABLE',bend:'BEND / WARP',vcrack:'VERTICAL CRACK',hcrack:'HORIZONTAL CRACK',weather:'SURFACE WEATHERING'};
+const TREE_META={stable:'no additional change',bend:'deformation / warping',vcrack:'fracture response',hcrack:'fracture response',weather:'terminal state'};
+function stableStateLabel(condition){if(condition==='bent')return'REMAIN BENT';if(condition==='cracked')return'REMAIN CRACKED';if(condition==='weathered')return'REMAIN WEATHERED';return'REMAIN INTACT'}
+function outcomeLabel(key,originCondition){return key==='stable'?stableStateLabel(originCondition):TREE_LABELS[key]}
+function nextConditionFromOutcome(originCondition,key){if(key==='stable')return originCondition;if(key==='bend')return'bent';if(key==='vcrack'||key==='hcrack')return'cracked';return'weathered'}
+function childMeta(key,nextCondition){if(key==='stable'){if(nextCondition==='clean')return'current state persists';if(nextCondition==='bent')return'bent state persists';if(nextCondition==='cracked')return'cracked state persists';return'terminal weathered state'}return TREE_META[key]}
+function renderFixings(){const prefix=$('grain').value==='vertical'?'A':'B',prev=$('fixing').value;const opts=Object.keys(FIXINGS).filter(k=>k[0]===prefix).map(k=>`<option value="${k}">${k} · ${FIXINGS[k].desc}</option>`).join('');$('fixing').innerHTML=opts;$('fixing').value=(prev&&prev[0]===prefix)?prev:prefix+'8'}
+function renderTimelineMarks(){const h=+$('horizon').value,y=+$('yearSlider').value,marks=[0,.2,.4,.6,.8,1].map(v=>Math.round(h*v));$('timelineMarks').innerHTML=marks.map(m=>`<div class="mark ${Math.abs(m-y)<=Math.max(1,h/12)?'active':''}"><i></i><b>T${m}</b><span>${m} yr</span></div>`).join('')}
+
+const TREE_STATE_ORDER=['clean','bent','cracked','weathered'];
+const TREE_STATE_LABELS={clean:'CLEAN',bent:'BENT',cracked:'CRACKED',weathered:'WEATHERED'};
+const TREE_STATE_COLORS={clean:'#d1ad7f',bent:'#b98352',cracked:'#d35a4b',weathered:'#8c7a60'};
+function nextStateDistribution(state){
+  if(state==='weathered') return {clean:0,bent:0,cracked:0,weathered:1};
+  const d=transitionDistribution(state);
+  if(state==='clean') return {clean:d.stable,bent:d.bend,cracked:(d.vcrack||0)+(d.hcrack||0),weathered:d.weather};
+  if(state==='bent') return {clean:0,bent:d.stable+d.bend,cracked:(d.vcrack||0)+(d.hcrack||0),weathered:d.weather};
+  return {clean:0,bent:0,cracked:(d.stable||0)+(d.bend||0)+(d.vcrack||0)+(d.hcrack||0),weathered:d.weather||0};
+}
+function treeSteps(){const h=+$('horizon').value, interval=+$('interval').value; return Math.max(1,Math.min(4,Math.floor(h/interval)||1));}
+function stateProbabilitySeries(originState,depth){
+  const series=[]; let current={clean:0,bent:0,cracked:0,weathered:0}; current[originState]=1; series.push(current);
+  for(let step=1; step<=depth; step++){
+    const next={clean:0,bent:0,cracked:0,weathered:0};
+    TREE_STATE_ORDER.forEach(state=>{const p=current[state]||0;if(!p)return; const dist=nextStateDistribution(state); TREE_STATE_ORDER.forEach(ns=>next[ns]+=p*(dist[ns]||0));});
+    series.push(next); current=next;
+  }
+  return series;
+}
+function renderTree(){
+  const originState=$('condition').value==='clean'?'clean':($('condition').value==='bent'?'bent':($('condition').value==='weathered'?'weathered':'cracked'));
+  const fix=$('fixing').value, grain=$('grain').value, interval=+$('interval').value, depth=treeSteps();
+  $('treeFix').textContent=fix; $('treeMoist').textContent=$('moisture').value+'%'; $('treeInterval').textContent=interval+' years'; $('treeDepth').textContent=depth+' updates';
+  const series=stateProbabilitySeries(originState,depth);
+  const W=980, H=460, padX=70, padY=46;
+  const xs=Array.from({length:depth+1},(_,i)=> padX + i*((W-padX*2)/depth));
+  const ys={clean:90,bent:185,cracked:280,weathered:375};
+  const nodeW=96, nodeH=44;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  // column labels
+  for(let i=0;i<=depth;i++){
+    const yr=i*interval; svg+=`<text x="${xs[i]}" y="20" text-anchor="middle" font-size="10" fill="#6c6c68" letter-spacing="1.2">${i===0?'ORIGIN':'UPDATE '+i}</text>`;
+    svg+=`<text x="${xs[i]}" y="34" text-anchor="middle" font-size="10" fill="#161616" font-weight="700">T${yr}</text>`;
+  }
+  // connectors
+  for(let step=0; step<depth; step++){
+    TREE_STATE_ORDER.forEach(state=>{
+      const p=series[step][state]||0; if(p<0.0005) return;
+      const dist=nextStateDistribution(state);
+      TREE_STATE_ORDER.forEach(ns=>{
+        const edge=p*(dist[ns]||0); if(edge<0.004) return;
+        const x1=xs[step]+nodeW/2, y1=ys[state], x2=xs[step+1]-nodeW/2, y2=ys[ns];
+        const dx=(x2-x1)*0.42; const sw=Math.max(0.7,edge*20);
+        svg+=`<path d="M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}" fill="none" stroke="${TREE_STATE_COLORS[ns]}" stroke-width="${sw.toFixed(2)}" opacity="0.7"/>`;
+      });
+    });
+  }
+  // nodes
+  for(let step=0; step<=depth; step++){
+    TREE_STATE_ORDER.forEach(state=>{
+      const prob=series[step][state]||0; if(step>0 && prob<0.003) return;
+      const x=xs[step]-nodeW/2, y=ys[state]-nodeH/2;
+      const active = step===0 ? state===originState : prob>0.003;
+      const opacity=active?1:0.28;
+      svg+=`<rect x="${x}" y="${y}" width="${nodeW}" height="${nodeH}" fill="#fff" stroke="#d9d9d4" opacity="${opacity}"/>`;
+      svg+=`<rect x="${x}" y="${y}" width="4" height="${nodeH}" fill="${TREE_STATE_COLORS[state]}" opacity="${opacity}"/>`;
+      svg+=`<text x="${x+8}" y="${y+16}" font-size="9.6" font-weight="700" fill="#161616" opacity="${opacity}">${TREE_STATE_LABELS[state]}</text>`;
+      svg+=`<text x="${x+8}" y="${y+31}" font-size="16" font-weight="700" fill="${TREE_STATE_COLORS[state]}" opacity="${opacity}">${Math.round(prob*100)}%</text>`;
+    });
+  }
+  svg+='</svg>';
+  $('treeStage').innerHTML=svg;
+}
+function renderSnapshots(){const h=+$('horizon').value,years=[0,.2,.4,.6,.8,1].map(v=>Math.round(h*v));$('snapshots').innerHTML=years.map((y,i)=>{const st=stats(series[y]);return `<div class="snap"><div class="snap-head"><b>T${y}</b><span>${y} years</span></div>${facadeSVG(series[y],true,i+1)}<div class="snap-summary">clean ${pct(st.clean)} · bent ${pct(st.bent)} · cracked ${pct(st.cracked)} · weathered ${pct(st.weathered)}</div></div>`}).join('')}
+function renderYear(y){const h=+$('horizon').value;y=Math.max(0,Math.min(h,y));$('yearSlider').value=y;$('yearVal').textContent=y;$('yearBig').textContent='T'+y;const cells=series[y],st=stats(cells);$('facade').innerHTML=facadeSVG(cells,false,y+1);$('metrics').innerHTML=`<div class="metric"><span>Clean</span><b>${pct(st.clean)}</b></div><div class="metric"><span>Bent</span><b>${pct(st.bent)}</b></div><div class="metric"><span>Cracked</span><b>${pct(st.cracked)}</b></div><div class="metric"><span>Weathered</span><b>${pct(st.weathered)}</b></div>`;const bars=[['Clean',st.clean,COLORS.clean],['Bent',st.bent,COLORS.bent],['Cracked',st.cracked,COLORS.cracked],['Weathered',st.weathered,COLORS.weathered]];$('stateBars').innerHTML=bars.map(([l,v,c])=>`<div class="bar-row"><span>${l}</span><span class="bar"><span class="fill" style="width:${v*100}%;background:${c}"></span></span><b>${pct(v)}</b></div>`).join('');$('settingsSummary').innerHTML=`<b>${$('fixing').value}</b> · ${$('grain').value} grain<br>Moisture exposure: <b>${$('moisture').value}%</b><br>Initial condition: <b>${$('condition').selectedOptions[0].textContent}</b><br>Probabilistic update every <b>${$('interval').value} years</b>`;renderTimelineMarks()}
+function rebuild(keepYear=true){stop();const old=+$('yearSlider').value,h=+$('horizon').value;$('yearSlider').max=h;$('scenarioLabel').textContent=`T0 → T${h} · update every ${$('interval').value} years`;$('moistureVal').textContent=$('moisture').value+'%';buildSeries();renderSnapshots();renderTree();renderYear(keepYear?Math.min(old,h):0)}
+function stop(){if(timer){clearInterval(timer);timer=null;$('play').textContent='Play'}}
+function play(){if(timer){stop();return}$('play').textContent='Pause';timer=setInterval(()=>{let y=+$('yearSlider').value,h=+$('horizon').value;if(y>=h){stop();return}renderYear(y+1)},+$('speed').value)}
+$('play').addEventListener('click',play);
+$('reset').addEventListener('click',()=>{stop();renderYear(0)});
+$('yearSlider').addEventListener('input',()=>{stop();renderYear(+$('yearSlider').value)});
+$('speed').addEventListener('input',()=>{$('speedVal').textContent=(+$('speed').value/1000).toFixed(2)+' s';if(timer){stop();play()}});
+$('grain').addEventListener('change',()=>{renderFixings();rebuild(false)});
+['fixing','condition','moisture','field','seed','horizon','interval'].forEach(id=>$(id).addEventListener('change',()=>rebuild(id!=='horizon')));
+$('moisture').addEventListener('input',()=>{$('moistureVal').textContent=$('moisture').value+'%'});
+$('update').addEventListener('click',()=>rebuild(true));
+$('random').addEventListener('click',()=>{$('seed').value=Math.floor(Math.random()*99999);rebuild(true)});
+$('speedVal').textContent=(+$('speed').value/1000).toFixed(2)+' s';
+renderFixings();
+rebuild(false);
+</script>
+</body>
+</html>

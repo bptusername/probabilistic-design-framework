@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Territorial-scale timeline demonstrator</title>
+<style>
+:root{
+  --bg:#fff;--paper:#fff;--ink:#161616;--muted:#6c6c68;--line:#d9d9d4;--soft:#f7f7f4;
+  --agri:#bfd1a8;--urban:#c2cbd0;--rec:#e2d7a8;--collector:#8bb7cf;--restricted:#b53c31;
+  --water:#6d9fba;--accent:#1d1d1d;
+}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arimo,Arial,sans-serif}
+body{padding:16px}.app{max-width:1280px;margin:0 auto;display:grid;gap:18px;zoom:.9}.panel{background:var(--paper);border:1px solid var(--line)}
+header.panel{border:0;border-bottom:1px solid var(--ink);padding:20px 0 18px}.kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3,p{margin:0}h1{font-size:34px;line-height:1.05;letter-spacing:-.04em;font-weight:500}.subtitle{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5;max-width:900px}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}.controls{position:sticky;top:14px;background:#fafaf8}.inner{padding:16px}
+.control{margin-bottom:16px}label{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;line-height:1.3}
+select,input[type=number]{width:100%;padding:9px 10px;border:1px solid #cfcfca;background:#fff;border-radius:0}input[type=range]{width:100%;accent-color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.value{font-weight:700;font-variant-numeric:tabular-nums;min-width:58px;text-align:right}
+button{border:1px solid var(--ink);background:var(--ink);color:#fff;padding:9px 11px;cursor:pointer;font-size:11px;letter-spacing:.03em}.secondary{background:#fff;color:var(--ink)}.buttonrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.note{border-left:1px solid var(--ink);padding:8px 0 8px 12px;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:12px}.note b{color:var(--ink)}
+.main{display:grid;gap:22px}.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:11px 16px 10px;border-bottom:1px solid #e4e4df}.section-title h2{font-size:16px;font-weight:600;letter-spacing:-.015em}.small{font-size:10.5px;color:var(--muted);line-height:1.45}
+.caption{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.timeline-top{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}.yearbig{font-size:40px;font-weight:600;letter-spacing:-.055em}
+.timeline-line{position:relative;height:64px}.timeline-line:before{content:"";position:absolute;left:0;right:0;top:26px;height:1px;background:#a9a9a4}.timeline-marks{display:flex;justify-content:space-between;position:relative;z-index:2}.mark{text-align:center;font-size:9px;color:var(--muted);min-width:44px}.mark i{display:block;width:12px;height:12px;border-radius:50%;background:#eef0ef;border:1px solid #8d8d89;margin:20px auto 5px}.mark.active i{background:var(--water);border-color:#678ba0}.mark b{display:block;color:var(--ink);font-size:10px}
+.stage{display:grid;grid-template-columns:minmax(440px,1.25fr) minmax(250px,.75fr);gap:12px;align-items:start}.card{border:1px solid var(--line);background:#fff;padding:10px}.territory-wrap svg{display:block;width:100%;height:auto}
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}.metric{border-top:1px solid var(--line);padding-top:8px}.metric span{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.metric b{display:block;font-size:19px;margin-top:2px;letter-spacing:-.03em}
+.bars{display:grid;gap:9px;margin-top:14px}.bar-row{display:grid;grid-template-columns:104px 1fr 46px;gap:8px;align-items:center;font-size:10.5px}.bar{height:11px;background:#f5f3ef;border:1px solid var(--line)}.fill{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}.leg{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)}.dot{width:13px;height:13px;border:1px solid var(--line)}.hatch{background:repeating-linear-gradient(135deg,#fff 0 3px,var(--restricted) 3px 5px)}
+.snapshots{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.snap{border:1px solid var(--line);padding:6px}.snap-head{display:flex;justify-content:space-between;font-size:8.5px;color:var(--muted);margin-bottom:5px}.snap-head b{font-size:9px;color:var(--ink)}.snap svg{display:block;width:100%;height:auto}.snap-summary{font-size:7.6px;color:var(--muted);line-height:1.3;margin-top:4px}
+.block-list{display:grid;gap:9px;margin-top:10px}.water-block{border:1px solid var(--line);background:#fff;padding:10px}.water-block.active{border-color:#7b9aaa;box-shadow:inset 4px 0 0 var(--water)}.wb-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.wb-name{font-size:12px;font-weight:700}.wb-years{font-size:9px;color:var(--muted)}.wb-water{font-size:19px;font-weight:700;letter-spacing:-.03em;color:#5b869d}.waterbar{height:10px;border:1px solid var(--line);background:#f3f3ef;margin-top:7px;position:relative;overflow:hidden}.waterbar:after{content:"";position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--ink);opacity:.35}.waterfill{height:100%;background:var(--water)}
+.block-control{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:6px}.block-control input{min-width:0}.block-value{font-size:10px;font-weight:700;min-width:38px;text-align:right}
+.rain-grid{display:grid;gap:6px;margin-top:8px}.rain-row{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;align-items:center;padding-top:7px;border-top:1px solid #ecece8}.rain-row:first-child{border-top:0;padding-top:0}.rain-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.rain-fields{display:grid;gap:6px}.rain-slider{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:9px;align-items:center}.rain-slider input[type=range]{width:100%;height:24px;padding:0;border:0;background:transparent;cursor:pointer}.rain-slider input[type=range]::-webkit-slider-runnable-track{height:4px;background:#d9d9d4;border-radius:2px}.rain-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:17px;height:17px;border-radius:50%;background:#161616;margin-top:-6.5px}.rain-slider input[type=range]::-moz-range-track{height:4px;background:#d9d9d4;border-radius:2px}.rain-slider input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#161616;border:0}.range-readout{font-size:10px;font-weight:700;text-align:right;color:#5b869d;font-variant-numeric:tabular-nums}.sampled-badge{margin-top:7px;border-top:1px solid #ecece8;padding-top:6px;font-size:9px;color:var(--muted)}.sampled-badge b{color:var(--ink)}
+.global-demand-card{border:1px solid var(--line);background:#fff;padding:10px;margin-top:8px}.global-demand-row{display:grid;grid-template-columns:82px minmax(0,1fr) 48px;gap:7px;align-items:center;padding:6px 0;border-top:1px solid #ecece8}.global-demand-row:first-child{border-top:0}.global-demand-row b{font-size:9px}.global-demand-row input[type=range]{width:100%;padding:0;border:0;background:transparent}.global-demand-row .range-readout{color:var(--ink)}.global-demand-note{font-size:9px;color:var(--muted);line-height:1.4;margin-top:7px;border-top:1px solid #ecece8;padding-top:7px}
+.transform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}.transform-metric{border:1px solid var(--line);padding:10px}.transform-metric span{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.transform-metric b{display:block;margin-top:4px;font-size:18px;letter-spacing:-.03em}
+.action-stage{position:relative;border:1px solid var(--line);background:#fbfaf7;padding:18px;display:grid;grid-template-columns:170px 1fr;gap:26px;align-items:center;min-height:330px}.action-origin{border:1px solid var(--line);background:#fff;padding:12px}.action-origin .name{font-weight:700;font-size:11px}.action-origin .meta{font-size:9px;color:var(--muted);line-height:1.35;margin-top:4px}.action-list{display:grid;gap:10px}.action{border:1px solid var(--line);background:#fff;padding:10px 12px;border-left:5px solid var(--c,#bbb);display:grid;grid-template-columns:1fr auto;gap:6px}.action .name{font-size:11px;font-weight:700}.action .val{font-size:20px;font-weight:700;color:var(--c,#555)}.action .meta{grid-column:1/3;font-size:9px;color:var(--muted)}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.setting{border-top:1px solid var(--line);padding-top:6px}.setting span{display:block;font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.setting b{display:block;margin-top:2px;font-size:10.5px}
+.method{margin-top:10px;font-size:10px;color:var(--muted);line-height:1.5}.method b{color:var(--ink)}
+
+/* Probability tree · rainfall / water-availability outcomes */
+.tree-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}.tree-metric{border:1px solid var(--line);padding:10px;background:#fff}.tree-metric span{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.tree-metric b{display:block;margin-top:4px;font-size:18px;letter-spacing:-.03em}
+.prob-tree-stage{position:relative;border:1px solid var(--line);background:#fbfaf7;min-height:610px;padding:18px;overflow:hidden}.prob-tree-stage>svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}.prob-tree-grid{position:relative;z-index:2;display:grid;grid-template-columns:190px minmax(0,1fr);gap:36px;align-items:center;min-height:570px}.prob-tree-root-wrap{display:flex;align-items:center;justify-content:center}.prob-tree-root{width:160px;border:1px solid #bbb;background:#fff;padding:12px}.prob-tree-root .name{font-size:11px;font-weight:700}.prob-tree-root .meta{font-size:8.8px;color:var(--muted);line-height:1.4;margin-top:4px}.prob-tree-families{display:grid;grid-template-columns:1fr;gap:12px}.prob-family{border:1px solid var(--line);background:#fff;padding:14px 16px;border-left:5px solid var(--c,#8ba4b1);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;min-height:118px}.prob-family.sampled{box-shadow:inset 0 0 0 1px #1d1d1d}.prob-family .mini{display:none}.prob-family .pf-name{font-size:11px;font-weight:700}.prob-family .pf-meta{font-size:9.2px;color:var(--muted);line-height:1.45;margin-top:5px}.prob-family .pf-prob{font-size:26px;font-weight:700;letter-spacing:-.04em;color:var(--c,#5b869d);align-self:start}.prob-family .pf-bar{height:8px;border:1px solid var(--line);background:#f0efeb;margin-top:8px;position:relative}.prob-family .pf-bar span{display:block;height:100%;background:var(--c,#5b869d)}.prob-connector{fill:none;stroke-width:2.1;stroke-linecap:round;vector-effect:non-scaling-stroke}.tree-method{margin-top:10px;font-size:10px;color:var(--muted);line-height:1.5}.tree-method b{color:var(--ink)}
+@media(max-width:900px){.prob-tree-grid{grid-template-columns:1fr;min-height:0}.prob-tree-stage>svg{display:none}.prob-tree-root{width:100%}.prob-family{grid-template-columns:1fr auto}.tree-metrics{grid-template-columns:1fr}}
+
+
+.initial-state-card{border:1px solid var(--line);background:#fff;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:7px 10px}
+.initial-state-item{border-top:1px solid #ecece8;padding-top:6px}
+.initial-state-item:nth-child(-n+2){border-top:0;padding-top:0}
+.initial-state-item span{display:block;font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.initial-state-item b{display:block;margin-top:2px;font-size:10.5px;font-weight:600;color:var(--ink)}
+.initial-state-note{grid-column:1/-1;border-top:1px solid #ecece8;padding-top:7px;font-size:9px;color:var(--muted);line-height:1.4}
+@media(max-width:1150px){.app{zoom:1;max-width:none}.layout{grid-template-columns:1fr}.controls{position:static}.stage{grid-template-columns:1fr}.snapshots{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){body{padding:10px}.app{zoom:1}.timeline-top{grid-template-columns:1fr}.snapshots{grid-template-columns:repeat(2,1fr)}.transform-grid,.metrics{grid-template-columns:1fr 1fr}.action-stage{grid-template-columns:1fr}}
+
+/* All-period rainfall probability tree */
+.period-tree-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start}
+.period-tree-card{border:1px solid var(--line);background:#fbfaf7;padding:12px;min-height:420px;position:relative}
+.period-tree-card.active{border-color:#6d9fba;box-shadow:inset 0 3px 0 #6d9fba}
+.period-tree-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;padding-bottom:9px;border-bottom:1px solid #deded9;margin-bottom:14px}
+.period-tree-head .pt-title{font-size:12px;font-weight:700}.period-tree-head .pt-range{font-size:8.5px;color:var(--muted);line-height:1.35;text-align:right}
+.period-tree-sampled{font-size:8.5px;color:var(--muted);margin-top:5px}.period-tree-sampled b{color:var(--ink)}
+.mini-tree{display:grid;grid-template-columns:82px 1fr;gap:14px;align-items:center;min-height:310px;position:relative}
+.mini-root{border:1px solid #bbb;background:#fff;padding:9px 8px;font-size:9px;font-weight:700;line-height:1.25;position:relative}
+.mini-root span{display:block;color:var(--muted);font-weight:400;font-size:7.8px;margin-top:4px;line-height:1.3}
+.mini-branches{display:grid;gap:10px;position:relative}.mini-branches:before{content:'';position:absolute;left:-8px;top:12%;bottom:12%;width:1px;background:#cbc8c1}
+.mini-branch{--c:#6d9fba;border:1px solid var(--line);border-left:4px solid var(--c);background:#fff;padding:9px 9px 8px;display:grid;grid-template-columns:1fr auto;gap:6px;position:relative}
+.mini-branch:before{content:'';position:absolute;left:-9px;top:50%;width:8px;height:1px;background:var(--c)}
+.mini-branch.sampled{box-shadow:inset 0 0 0 1px #161616}
+.mini-branch .mb-name{font-size:9px;font-weight:700}.mini-branch .mb-prob{font-size:18px;font-weight:700;letter-spacing:-.04em;color:var(--c)}
+.mini-branch .mb-water{grid-column:1/3;font-size:8px;color:var(--muted)}
+.mini-branch .mb-bar{grid-column:1/3;height:6px;border:1px solid var(--line);background:#f0efeb}.mini-branch .mb-bar span{display:block;height:100%;background:var(--c)}
+@media(max-width:1100px){.period-tree-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.period-tree-grid{grid-template-columns:1fr}}
+
+
+
+/* Full branching rainfall scenario tree */
+.scenario-tree-host{border:1px solid var(--line);background:#fbfaf7;padding:14px;overflow:auto}
+.scenario-tree-scroller{overflow:auto}
+.scenario-tree-canvas{position:relative;min-width:1280px;background:#fbfaf7}
+.scenario-tree-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.scenario-root,.scenario-node,.scenario-colhead{position:absolute;transform:translate(-50%,-50%);background:#fff}
+.scenario-root{width:76px;padding:8px 6px;border:1px solid #bdbdb8;text-align:center;font-size:10px;font-weight:700;line-height:1.2}
+.scenario-root span{display:block;font-size:8px;color:var(--muted);font-weight:400;margin-top:3px}
+.scenario-colhead{border:0;background:transparent;text-align:center;min-width:160px}
+.scenario-colhead b{display:block;font-size:12px}.scenario-colhead span{display:block;font-size:8.5px;color:var(--muted);line-height:1.25;margin-top:2px}
+.scenario-node{border:1px solid var(--line);border-left:4px solid var(--c,#6d9fba);padding:4px 6px;text-align:left;box-shadow:0 0 0 0 transparent}
+.scenario-node .sn-top{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.scenario-node .sn-code{font-size:8px;font-weight:700;letter-spacing:.02em}.scenario-node .sn-prob{font-size:11px;font-weight:700;color:var(--c,#6d9fba)}
+.scenario-node .sn-meta{font-size:7px;color:var(--muted);line-height:1.2;margin-top:2px}.scenario-node.lvl1{width:118px;min-height:42px}.scenario-node.lvl2{width:112px;min-height:38px}.scenario-node.lvl3{width:106px;min-height:34px}.scenario-node.lvl4{width:100px;min-height:28px}.scenario-node.lvl4 .sn-code{font-size:7.4px}.scenario-node.lvl4 .sn-prob{font-size:10px}.scenario-node.lvl4 .sn-meta{font-size:6.5px}
+@media(max-width:1100px){.scenario-tree-canvas{min-width:1180px}}
+
+@page{size:A3 landscape;margin:10mm;}
+@media print{
+  html,body{background:#fff !important;}
+  body{padding:0;}
+  .app{max-width:none;gap:14px;}
+  .panel{break-inside:avoid; page-break-inside:avoid; box-shadow:none;}
+  .water-block,.snap,.prob-period,.card{break-inside:avoid; page-break-inside:avoid;}
+  .controls{position:static;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="panel">
+  <div class="kicker">Probabilistic Design Framework · Territorial demonstrator</div>
+  <h1>Territorial-scale timeline demonstrator</h1>
+</header>
+<div class="layout">
+<aside class="panel controls"><div class="inner">
+  <div class="control"><label for="yearSlider">Simulation month T</label><div class="row"><input id="yearSlider" type="range" min="1" max="96" step="1" value="1"><span id="yearVal" class="value">M1</span></div></div>
+  <div class="control"><label for="speed">Animation speed</label><div class="row"><input id="speed" type="range" min="60" max="700" step="20" value="120"><span id="speedVal" class="value">0.12 s</span></div></div>
+  <div class="buttonrow"><button id="play">Play</button><button id="reset" class="secondary">Reset time</button></div>
+
+  <div class="control" style="margin-top:18px">
+    <label>Initial territorial state · fixed starting condition</label>
+    <div class="initial-state-card">
+      <div class="initial-state-item"><span>Land-use mix</span><b>55% agriculture · 25% urban · 20% recreational</b></div>
+      <div class="initial-state-item"><span>Territorial grid</span><b>10 × 10 · 100 cells</b></div>
+      <div class="initial-state-item"><span>Initial reserve</span><b>0.0 units</b></div>
+      <div class="initial-state-item"><span>Initial collectors</span><b>0 cells</b></div>
+      <div class="initial-state-note">This starting territory is kept constant so the simulation compares how different water sequences transform the same initial condition.</div>
+    </div>
+  </div>
+
+  <div class="control" style="margin-top:18px">
+    <label>Internal variable · land-use water demand · constant across all periods</label>
+    <div class="global-demand-card">
+      <div class="global-demand-row"><b>Agriculture</b><input id="demandAgri" type="range" min="0" max="2.50" step="0.05" value="1.40"><span class="range-readout" id="demandAgriVal">1.40</span></div>
+      <div class="global-demand-row"><b>Urban</b><input id="demandUrban" type="range" min="0" max="2.50" step="0.05" value="1.00"><span class="range-readout" id="demandUrbanVal">1.00</span></div>
+      <div class="global-demand-row"><b>Recreational</b><input id="demandRec" type="range" min="0" max="2.50" step="0.05" value="0.55"><span class="range-readout" id="demandRecVal">0.55</span></div>
+      <div class="global-demand-note">units / active cell · one shared demand setting is applied to the full 8-year simulation</div>
+    </div>
+  </div>
+
+  <div class="control"><label>Rainfall / water-availability distribution by 2-year block</label><div class="small" style="margin-bottom:8px">Low / medium / high already carry a fixed water-availability value; only their relative weight is edited.</div><div id="waterControls" class="block-list"></div></div>
+
+  <div class="control"><label for="seed">Stochastic seed</label><input id="seed" type="number" value="21"></div>
+  <div class="buttonrow"><button id="update">Update</button><button id="random" class="secondary">New seed</button></div>
+
+  <div class="control" style="margin-top:18px"><label>Territorial legend</label><div class="legend" style="display:grid;gap:7px">
+    <span class="leg"><span class="dot" style="background:var(--agri)"></span>agriculture</span>
+    <span class="leg"><span class="dot" style="background:var(--urban)"></span>urban</span>
+    <span class="leg"><span class="dot" style="background:var(--rec)"></span>recreational</span>
+    <span class="leg"><span class="dot" style="background:var(--collector)"></span>water collector</span>
+    <span class="leg"><span class="dot hatch"></span>restricted</span>
+  </div></div>
+
+</div></aside>
+
+<main class="main">
+<section class="panel">
+  <div class="section-title"><div><h2>Forward rainfall scenario</h2></div><div class="small">8-year / 96-month simulation · four 2-year rainfall blocks</div></div>
+  <div class="inner"><div class="timeline-top"><div><div class="caption">Current simulated time</div><div class="yearbig" id="yearBig">Month 1</div><div class="small" id="periodSmall">Year 1 · month 1 · Period 01</div></div><div class="timeline-line"><div class="timeline-marks" id="timelineMarks"></div></div></div></div>
+</section>
+
+<section class="panel">
+  <div class="section-title"><div><h2>Water balance → territorial state</h2></div><div class="small">monthly water availability + globally defined land-use demand + inherited reserve → restriction / collection / reactivation</div></div>
+  <div class="inner stage">
+    <div class="card territory-wrap"><div class="caption">Territorial field</div><div id="territory"></div><div class="legend"><span class="leg"><span class="dot" style="background:var(--agri)"></span>agriculture</span><span class="leg"><span class="dot" style="background:var(--urban)"></span>urban</span><span class="leg"><span class="dot" style="background:var(--rec)"></span>recreational</span><span class="leg"><span class="dot" style="background:var(--collector)"></span>collector</span><span class="leg"><span class="dot hatch"></span>restricted</span></div></div>
+    <div style="display:grid;gap:14px">
+      <div class="card"><div class="caption">Key metrics</div><div class="metrics" id="metrics"></div><div class="bars" id="restrictionBars"></div></div>
+      <div class="card"><div class="caption">Current model settings</div><div class="settings-grid">
+        <div class="setting"><span>Initial land-use mix</span><b>55 / 25 / 20</b></div><div class="setting"><span>Update interval</span><b>1 month</b></div>
+        <div class="setting"><span>Protection priorities · fixed</span><b>75 / 55 / 20%</b></div><div class="setting"><span>Collector capacity</span><b>8 units / cell</b></div>
+        <div class="setting"><span>Demand / active cell</span><b id="globalDemandSetting">1.40 / 1.00 / 0.55</b></div><div class="setting"><span>Reference water</span><b>100% = baseline demand</b></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-title"><div><h2>Territorial evolution</h2></div><div class="small">one snapshot at the end of each simulated year</div></div>
+  <div class="inner"><div class="snapshots" id="snapshots"></div></div>
+</section>
+
+
+
+<section class="panel">
+  <div class="section-title"><div><h2>Rainfall Scenario Tree</h2></div><div class="small">complete branching structure across the four 2-year periods · 3⁴ = 81 possible end paths</div></div>
+  <div class="inner">
+    <div id="allPeriodTrees" class="scenario-tree-host"></div>
+  </div>
+</section>
+<div class="small" style="padding:0 2px 10px">Probabilistic Design Framework · illustrative territorial timeline demonstrator · Case 03</div>
+</main>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const COLORS={agri:'#bfd1a8',urban:'#c2cbd0',rec:'#e2d7a8',collector:'#8bb7cf'};
+const REF_NEEDS={agri:1.40,urban:1.00,rec:0.55};
+function globalNeeds(){return {
+  agri:Math.max(0,+$('demandAgri').value||0),
+  urban:Math.max(0,+$('demandUrban').value||0),
+  rec:Math.max(0,+$('demandRec').value||0)
+}}
+const MIX={agri:55,urban:25,rec:20};
+const PROTECT={agri:75,urban:55,rec:20};
+const COLLECT_CAP=8, GRID=10, UPDATE_INTERVAL=1, SIM_MONTHS=96, MONTH_FLOW_SCALE=1/12;
+const PERIODS=[
+  {index:0,min:1,max:24,name:'PERIOD 01',years:'months 1–24 · years 1–2',rain:[{key:'low',label:'LOW RAINFALL',water:70,prob:25},{key:'medium',label:'MEDIUM RAINFALL',water:115,prob:50},{key:'high',label:'HIGH RAINFALL',water:155,prob:25}]},
+  {index:1,min:25,max:48,name:'PERIOD 02',years:'months 25–48 · years 3–4',rain:[{key:'low',label:'LOW RAINFALL',water:40,prob:50},{key:'medium',label:'MEDIUM RAINFALL',water:70,prob:35},{key:'high',label:'HIGH RAINFALL',water:110,prob:15}]},
+  {index:2,min:49,max:72,name:'PERIOD 03',years:'months 49–72 · years 5–6',rain:[{key:'low',label:'LOW RAINFALL',water:100,prob:15},{key:'medium',label:'MEDIUM RAINFALL',water:140,prob:45},{key:'high',label:'HIGH RAINFALL',water:180,prob:40}]},
+  {index:3,min:73,max:96,name:'PERIOD 04',years:'months 73–96 · years 7–8',rain:[{key:'low',label:'LOW RAINFALL',water:50,prob:45},{key:'medium',label:'MEDIUM RAINFALL',water:80,prob:40},{key:'high',label:'HIGH RAINFALL',water:120,prob:15}]}
+];
+let rainScheduleByPeriod=[],rainByMonth=[],rainCountsByPeriod=[];
+let series=[],metricsSeries=[],timer=null;
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function normWeights(arr){const clean=arr.map(v=>Math.max(0,+v||0)),s=clean.reduce((a,b)=>a+b,0);return s?clean.map(v=>v/s):arr.map(()=>1/arr.length)}
+function largestRemainder(total,weights){if(total<=0)return weights.map(()=>0);const raw=weights.map(w=>w*total),base=raw.map(Math.floor);let rem=total-base.reduce((a,b)=>a+b,0);const order=raw.map((v,i)=>({i,r:v-base[i]})).sort((a,b)=>b.r-a.r);for(let k=0;k<rem;k++)base[order[k%order.length].i]++;return base}
+function periodFor(y){return PERIODS.find(p=>y>=p.min&&y<=p.max)||PERIODS[0]}
+function normalizedRain(p){const vals=p.rain.map(r=>Math.max(0,+r.prob||0)),sum=vals.reduce((a,b)=>a+b,0);return p.rain.map((r,i)=>({...r,nprob:sum?vals[i]/sum:1/p.rain.length}))}
+function buildRainSchedule(){
+  const baseSeed=(+$('seed').value||1)+92821;
+  rainScheduleByPeriod=[]; rainCountsByPeriod=[]; rainByMonth=[null,...Array(SIM_MONTHS)];
+  PERIODS.forEach((p,pi)=>{
+    const rr=normalizedRain(p);
+    const counts=largestRemainder(24,rr.map(r=>r.nprob));
+    const months=[];
+    rr.forEach((r,i)=>{for(let k=0;k<counts[i];k++)months.push({...r})});
+    const rng=mulberry32(baseSeed+pi*17117);
+    for(let i=months.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[months[i],months[j]]=[months[j],months[i]]}
+    rainScheduleByPeriod[pi]=months;
+    rainCountsByPeriod[pi]=Object.fromEntries(rr.map((r,i)=>[r.key,counts[i]]));
+    months.forEach((r,offset)=>{rainByMonth[p.min+offset]={...r}});
+  });
+}
+function rainfallForMonth(m){return rainByMonth[m]||normalizedRain(periodFor(m))[1]}
+function allocationText(pi){const c=rainCountsByPeriod[pi]||{};return `LOW ${c.low||0} · MEDIUM ${c.medium||0} · HIGH ${c.high||0} months`}
+function demandIntensity(use,needs=null){if(use==='collector')return 0;const n=needs||globalNeeds();return Math.max(0,n[use]||0)*MONTH_FLOW_SCALE}
+function makeInitialState(){const total=GRID*GRID,weights=normWeights([MIX.agri,MIX.urban,MIX.rec]),counts=largestRemainder(total,weights),uses=[];['agri','urban','rec'].forEach((u,i)=>{for(let k=0;k<counts[i];k++)uses.push(u)});const rng=mulberry32(13091);for(let i=uses.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[uses[i],uses[j]]=[uses[j],uses[i]]}return {cells:uses.map((use,i)=>({i,use,restricted:false,sourceUse:null})),storage:0}}
+function cloneState(s){return{cells:s.cells.map(c=>({...c})),storage:s.storage}}
+function fullDemand(state,needs=null){return state.cells.reduce((s,c)=>s+demandIntensity(c.use,needs),0)}
+function activeDemand(state,needs=null){return state.cells.reduce((s,c)=>s+(c.restricted?0:demandIntensity(c.use,needs)),0)}
+function countUse(state,use){return state.cells.filter(c=>c.use===use).length}
+function collectorCount(state){return countUse(state,'collector')}
+function storageCapacity(state){return collectorCount(state)*COLLECT_CAP}
+function referenceDemand(){return fullDemand(makeInitialState(),REF_NEEDS)}
+function resetRestrictions(state){state.cells.forEach(c=>c.restricted=false)}
+function restrictionPlan(state,deficit){const uses=['agri','urban','rec'],availableDemand=uses.map(u=>countUse(state,u)*demandIntensity(u)),pressure=uses.map(u=>Math.max(.05,1-PROTECT[u]/100));const cut=[0,0,0];let remaining=Math.max(0,deficit),active=[0,1,2],guard=0;while(remaining>1e-9&&active.length&&guard++<20){const scores=active.map(i=>pressure[i]*Math.max(.0001,availableDemand[i]-cut[i]));let sum=scores.reduce((a,b)=>a+b,0);if(sum<=0)sum=active.length;let saturated=[];active.forEach((i,idx)=>{const share=remaining*(scores[idx]/sum),room=Math.max(0,availableDemand[i]-cut[i]);if(share>=room-1e-9){cut[i]+=room;saturated.push(i)}else cut[i]+=share});const totalCut=cut.reduce((a,b)=>a+b,0);remaining=Math.max(0,deficit-totalCut);active=active.filter(i=>!saturated.includes(i));if(!saturated.length)break}let counts=uses.map((u,i)=>Math.min(countUse(state,u),Math.floor(cut[i]/Math.max(.0001,demandIntensity(u)))));let saved=counts.reduce((s,c,i)=>s+c*demandIntensity(uses[i]),0);while(saved+1e-9<deficit){let best=-1,bestScore=-Infinity;uses.forEach((u,i)=>{if(counts[i]<countUse(state,u)){const score=pressure[i]/Math.max(.0001,demandIntensity(u));if(score>bestScore){bestScore=score;best=i}}});if(best<0)break;counts[best]++;saved+=demandIntensity(uses[best])}return{uses,counts,saved,cutUnits:cut}}
+function gridXY(i){return{x:i%GRID,y:Math.floor(i/GRID)}}
+function neighbourScore(idx,selectedSet){const {x,y}=gridXY(idx);let s=0;[[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<GRID&&ny<GRID&&selectedSet.has(ny*GRID+nx))s++});return s}
+function chooseCells(state,use,count,rng){const candidates=state.cells.filter(c=>c.use===use&&!c.restricted),selected=[],selectedSet=new Set();for(let k=0;k<count&&candidates.length;k++){const scored=candidates.map(c=>{const {x}=gridXY(c.i);let score=rng()*1.35+neighbourScore(c.i,selectedSet)*1.8+(use==='agri'?Math.abs(x-(GRID-1)/2)*.04:0);return{c,score}}).sort((a,b)=>b.score-a.score);const pick=scored[Math.floor(rng()*Math.min(3,scored.length))].c;selected.push(pick);selectedSet.add(pick.i);candidates.splice(candidates.indexOf(pick),1)}return selected}
+function applyRestrictions(state,plan,rng){plan.uses.forEach((u,i)=>chooseCells(state,u,plan.counts[i],rng).forEach(c=>c.restricted=true))}
+function collectorDistanceScore(idx,state,selectedSet){const {x,y}=gridXY(idx),refs=[];state.cells.forEach(c=>{if(c.use==='collector')refs.push(gridXY(c.i))});selectedSet.forEach(i=>refs.push(gridXY(i)));if(!refs.length)return .5;let minD=Infinity;refs.forEach(p=>{const dx=x-p.x,dy=y-p.y;minD=Math.min(minD,Math.sqrt(dx*dx+dy*dy))});return clamp(minD/(Math.sqrt(2)*Math.max(1,GRID-1)),0,1)}
+function collectorProtectionScore(use){return clamp(1-(PROTECT[use]??100)/100,0,1)}
+function addCollectors(state,count,rng){const candidates=state.cells.filter(c=>c.use!=='collector'),selected=[],selectedSet=new Set();for(let k=0;k<count&&candidates.length;k++){const scored=candidates.map(c=>({c,score:collectorProtectionScore(c.use)*4+collectorDistanceScore(c.i,state,selectedSet)*2.5+rng()*.9})).sort((a,b)=>b.score-a.score);const pool=Math.min(3,scored.length),pick=scored[Math.floor(rng()*pool)].c;selected.push(pick);selectedSet.add(pick.i);candidates.splice(candidates.indexOf(pick),1)}selected.forEach(cell=>{cell.sourceUse=cell.use;cell.use='collector';cell.restricted=false});return selected.length}
+function evolveState(start,waterPct,seedOffset){const state=cloneState(start);resetRestrictions(state);const rng=mulberry32((+$('seed').value||1)+seedOffset*7919),refD=referenceDemand(),external=refD*waterPct/100,fullD=fullDemand(state),cap0=storageCapacity(state);let storage=clamp(state.storage,0,cap0),reserveUsed=0,deficit0=0,plan={uses:['agri','urban','rec'],counts:[0,0,0],saved:0},newCollectors=0,spilled=0;if(external<fullD){reserveUsed=Math.min(storage,fullD-external);storage-=reserveUsed;const usable=external+reserveUsed;deficit0=Math.max(0,fullD-usable);if(deficit0>0){plan=restrictionPlan(state,deficit0);applyRestrictions(state,plan,rng)}const demandAfter=activeDemand(state),leftover=Math.max(0,usable-demandAfter);storage=Math.min(storageCapacity(state),storage+leftover)}else{const surplus=Math.max(0,external-fullD),needed=Math.max(0,storage+surplus-storageCapacity(state));if(needed>1e-9)newCollectors=addCollectors(state,Math.ceil(needed/COLLECT_CAP),rng);const demandAfter=activeDemand(state),totalSurplus=Math.max(0,external-demandAfter),cap=storageCapacity(state),targetStorage=storage+totalSurplus;storage=Math.min(cap,targetStorage);spilled=Math.max(0,targetStorage-cap)}state.storage=storage;const demandAfter=activeDemand(state);return{state,metrics:{referenceD:refD,external,fullD,demandAfter,reserveUsed,deficit0,plan,newCollectors,storage,capacity:storageCapacity(state),spilled,waterPct}}}
+function useCounts(state){return{agri:countUse(state,'agri'),urban:countUse(state,'urban'),rec:countUse(state,'rec'),collector:countUse(state,'collector')}}
+function restrictedCounts(state){const o={agri:0,urban:0,rec:0};state.cells.forEach(c=>{if(c.restricted&&o[c.use]!==undefined)o[c.use]++});return o}
+function territorySVG(state,mini=false,uid='x'){const cell=mini?20:30,gap=mini?1.3:2,pad=mini?5:7,W=pad*2+GRID*cell+(GRID-1)*gap,H=W,pat='rh'+uid;let s=`<svg viewBox="0 0 ${W} ${H}"><defs><pattern id="${pat}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#b53c31" stroke-width="2.4" opacity=".92"/></pattern></defs><rect width="${W}" height="${H}" fill="#fbfaf7"/>`;state.cells.forEach(c=>{const x=pad+(c.i%GRID)*(cell+gap),y=pad+Math.floor(c.i/GRID)*(cell+gap);s+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="${COLORS[c.use]}" stroke="#fff" stroke-width="${mini?.7:1}"/>`;if(c.restricted)s+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="url(#${pat})" stroke="#b53c31" stroke-width="${mini?.6:1}"/>`;if(c.use==='collector')s+=`<path d="M${x+cell*.17} ${y+cell*.6} Q${x+cell*.34} ${y+cell*.4} ${x+cell*.5} ${y+cell*.6} T${x+cell*.83} ${y+cell*.6}" fill="none" stroke="#f5f9fb" stroke-width="${mini?1:1.6}" opacity=".9"/>`});return s+'</svg>'}
+function buildSeries(){buildRainSchedule();let state=makeInitialState();series=[null,...Array(SIM_MONTHS)];metricsSeries=[null,...Array(SIM_MONTHS)];let lastMetrics={referenceD:referenceDemand(),external:referenceDemand(),fullD:fullDemand(state),demandAfter:fullDemand(state),reserveUsed:0,deficit0:0,plan:{uses:['agri','urban','rec'],counts:[0,0,0]},newCollectors:0,storage:0,capacity:0,spilled:0,waterPct:100};for(let m=1;m<=SIM_MONTHS;m++){if(m===1||(m-1)%UPDATE_INTERVAL===0){const rainfall=rainfallForMonth(m),obj=evolveState(state,rainfall.water,m);state=obj.state;lastMetrics={...obj.metrics,rainKey:rainfall.key,rainLabel:rainfall.label,rainProb:rainfall.nprob}}series[m]=cloneState(state);metricsSeries[m]={...lastMetrics,plan:{...lastMetrics.plan,uses:[...lastMetrics.plan.uses],counts:[...lastMetrics.plan.counts]}}}}
+function renderWaterControls(){
+  const host=$('waterControls');
+  host.innerHTML=PERIODS.map((p,i)=>{
+    const rows=p.rain.map((r,j)=>`<div class="rain-row">
+      <div class="rain-name">${r.key}<br><span style="font-weight:400;color:var(--muted);font-size:8px">${r.water}% water</span></div>
+      <div class="rain-fields">
+        <div class="rain-slider"><input id="prob_${i}_${j}" type="range" min="0" max="100" step="1" value="${r.prob}"><span class="range-readout" id="probVal_${i}_${j}">${r.prob}%</span></div>
+      </div>
+    </div>`).join('');
+    return `<div class="water-block" id="controlBlock${i}"><div class="wb-head"><div><div class="wb-name">${p.name}</div><div class="wb-years">${p.years}</div></div></div><div class="rain-grid">${rows}</div><div class="sampled-badge" id="frequencyControl${i}">24-month allocation updates from weights</div></div>`;
+  }).join('');
+  PERIODS.forEach((p,i)=>{
+    p.rain.forEach((r,j)=>{
+      const pi=$('prob_'+i+'_'+j),pv=$('probVal_'+i+'_'+j);
+      pi.addEventListener('input',()=>{r.prob=clamp(+pi.value||0,0,100);pv.textContent=r.prob+'%';rebuild(true)});
+    });
+  });
+}
+function timeParts(m){return{year:Math.floor((m-1)/12)+1,month:((m-1)%12)+1}}
+function renderTimeline(m){const marks=[1,12,24,36,48,60,72,84,96];$('timelineMarks').innerHTML=marks.map(mm=>{const tp=timeParts(mm);return`<div class="mark ${periodFor(m).index===periodFor(mm).index?'active':''}"><i></i><b>M${mm}</b><span>Y${tp.year}</span></div>`}).join('')}
+function renderSnapshots(){const months=[12,24,36,48,60,72,84,96];$('snapshots').innerHTML=months.map((m,i)=>{const st=series[m],met=metricsSeries[m],u=useCounts(st),r=restrictedCounts(st),rr=r.agri+r.urban+r.rec,tp=timeParts(m);return`<div class="snap"><div class="snap-head"><b>Year ${tp.year}</b><span>M${m}</span></div>${territorySVG(st,true,'s'+i)}<div class="snap-summary">${met.rainLabel.toLowerCase()} ${met.waterPct}% · demand ${met.fullD.toFixed(1)} · restricted ${rr}<br>collectors ${u.collector} · reserve ${st.storage.toFixed(1)}</div></div>`}).join('')}
+function pctRestricted(state,use){const n=countUse(state,use),r=state.cells.filter(c=>c.use===use&&c.restricted).length;return n?r/n:0}
+function renderMonth(m){m=Math.max(1,Math.min(SIM_MONTHS,m));$('yearSlider').value=m;$('yearVal').textContent='M'+m;const needs=globalNeeds();$('globalDemandSetting').textContent=`${needs.agri.toFixed(2)} / ${needs.urban.toFixed(2)} / ${needs.rec.toFixed(2)}`;const p=periodFor(m),state=series[m],met=metricsSeries[m],tp=timeParts(m),u=useCounts(state),r=restrictedCounts(state),restr=r.agri+r.urban+r.rec;$('yearBig').textContent='Month '+m;$('periodSmall').textContent=`Year ${tp.year} · month ${tp.month} · ${p.name} · ${met.rainLabel.toLowerCase()} · water ${met.waterPct}%`;$('territory').innerHTML=territorySVG(state,false,'main'+m);$('metrics').innerHTML=`<div class="metric"><span>External water</span><b>${met.external.toFixed(1)}</b></div><div class="metric"><span>Territorial demand</span><b>${met.fullD.toFixed(1)}</b></div><div class="metric"><span>Restricted cells</span><b>${restr}</b></div><div class="metric"><span>Collectors</span><b>${u.collector}</b></div><div class="metric"><span>Stored reserve</span><b>${state.storage.toFixed(1)}</b></div><div class="metric"><span>Initial deficit</span><b>${met.deficit0.toFixed(1)}</b></div>`;const rows=[['Agriculture',pctRestricted(state,'agri'),COLORS.agri],['Urban',pctRestricted(state,'urban'),COLORS.urban],['Recreational',pctRestricted(state,'rec'),COLORS.rec]];$('restrictionBars').innerHTML=rows.map(([lab,v,c])=>`<div class="bar-row"><span>${lab}</span><span class="bar"><span class="fill" style="width:${v*100}%;background:${c}"></span></span><b>${Math.round(v*100)}%</b></div>`).join('');document.querySelectorAll('[id^=controlBlock]').forEach((el,i)=>el.classList.toggle('active',i===p.index));PERIODS.forEach((pp,i)=>{const fb=$('frequencyControl'+i);if(fb)fb.innerHTML=`24-month allocation: <b>${allocationText(i)}</b>`});renderTimeline(m);renderProbabilityTree(m)}
+
+function drawProbabilityConnectors(){}
+function buildScenarioTreeData(){
+  let nodeId=0, leafCounter=0;
+  const nodes=[], edges=[];
+  function grow(level,parentId,cumProb){
+    const rr=normalizedRain(PERIODS[level]);
+    const out=[];
+    rr.forEach(r=>{
+      const id='tree_'+(nodeId++);
+      const node={id,parentId,level,key:r.key,label:r.label,water:r.water,nprob:r.nprob,cumProb:cumProb*r.nprob,count:(rainCountsByPeriod[level]||{})[r.key]||0,children:[]};
+      nodes.push(node);
+      if(parentId) edges.push({from:parentId,to:id,key:r.key});
+      if(level===PERIODS.length-1){
+        node.yIndex=leafCounter++;
+      }else{
+        node.children=grow(level+1,id,node.cumProb);
+        node.yIndex=node.children.reduce((s,ch)=>s+ch.yIndex,0)/node.children.length;
+      }
+      out.push(node);
+    });
+    return out;
+  }
+  const first=grow(0,'root',1);
+  const rootY=first.reduce((s,n)=>s+n.yIndex,0)/first.length;
+  return {nodes,edges,leafCount:leafCounter,rootY};
+}
+
+function renderProbabilityTree(m){
+  const host=$('allPeriodTrees');
+  const data=buildScenarioTreeData();
+  const leafGap=15;
+  const topPad=88;
+  const height=Math.max(980, topPad*2 + (data.leafCount-1)*leafGap);
+  const width=1540;
+  const colXs={root:70, 0:290, 1:620, 2:950, 3:1280};
+  const nodePos={root:{x:colXs.root,y:topPad+data.rootY*leafGap}};
+  data.nodes.forEach(n=>{ nodePos[n.id]={x:colXs[n.level], y:topPad+n.yIndex*leafGap}; });
+  const colors={low:'#b98352',medium:'#6d9fba',high:'#73927e'};
+  const heads=PERIODS.map((p,i)=>`<div class="scenario-colhead" style="left:${colXs[i]}px; top:24px"><b>${p.name}</b><span>${p.years}</span><span>${allocationText(i)}</span></div>`).join('');
+  const root=`<div class="scenario-root" style="left:${colXs.root}px; top:${nodePos.root.y}px">START<span>4-period rainfall structure</span></div>`;
+  const nodesHtml=data.nodes.map(n=>{
+    const pos=nodePos[n.id], c=colors[n.key]||'#6d9fba';
+    const lvl='lvl'+(n.level+1);
+    const short=n.label.replace(' RAINFALL','');
+    const topLine = n.level===3 ? `P${String(n.level+1).padStart(2,'0')} · ${short}` : `P${String(n.level+1).padStart(2,'0')} · ${short}`;
+    const meta = `${n.water}% water · ${n.count}/24 months`;
+    return `<div class="scenario-node ${lvl}" style="left:${pos.x}px; top:${pos.y}px; --c:${c}"><div class="sn-top"><span class="sn-code">${topLine}</span><span class="sn-prob">${Math.round(n.nprob*100)}%</span></div><div class="sn-meta">${meta}</div></div>`;
+  }).join('');
+  const edges=[{from:'root',to:data.nodes.filter(n=>n.level===0).map(n=>n.id)}];
+  const edgePaths=data.edges.map(e=>{
+    const a=nodePos[e.from], b=nodePos[e.to], c=colors[e.key]||'#bbb';
+    const dx=Math.max(28,(b.x-a.x)*0.42);
+    return `<path d="M ${a.x+38} ${a.y} C ${a.x+dx} ${a.y}, ${b.x-dx} ${b.y}, ${b.x-54} ${b.y}" stroke="${c}" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;
+  }).join('');
+  host.innerHTML=`<div class="scenario-tree-scroller"><div class="scenario-tree-canvas" style="width:${width}px;height:${height}px"><svg class="scenario-tree-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${edgePaths}</svg>${heads}${root}${nodesHtml}</div></div>`;
+}
+
+function stop(){if(timer){clearInterval(timer);timer=null;$('play').textContent='Play'}}
+function play(){if(timer){stop();return}$('play').textContent='Pause';timer=setInterval(()=>{let m=+$('yearSlider').value;if(m>=SIM_MONTHS){stop();return}renderMonth(m+1)},+$('speed').value)}
+function rebuild(keepMonth=true){stop();const old=+$('yearSlider').value;buildSeries();renderSnapshots();renderMonth(keepMonth?Math.min(old,SIM_MONTHS):1)}
+['demandAgri','demandUrban','demandRec'].forEach(id=>{
+  const input=$(id),out=$(id+'Val');
+  const sync=()=>{out.textContent=(+input.value).toFixed(2);rebuild(true)};
+  input.addEventListener('input',sync);
+});
+$('play').addEventListener('click',play);$('reset').addEventListener('click',()=>{stop();renderMonth(1)});$('yearSlider').addEventListener('input',()=>{stop();renderMonth(+$('yearSlider').value)});$('speed').addEventListener('input',()=>{$('speedVal').textContent=(+$('speed').value/1000).toFixed(2)+' s';if(timer){stop();play()}});$('update').addEventListener('click',()=>rebuild(true));$('random').addEventListener('click',()=>{$('seed').value=Math.floor(Math.random()*99999);rebuild(true)});$('seed').addEventListener('change',()=>rebuild(true));$('speedVal').textContent=(+$('speed').value/1000).toFixed(2)+' s';renderWaterControls();rebuild(false);
+</script>
+</body>
+</html>

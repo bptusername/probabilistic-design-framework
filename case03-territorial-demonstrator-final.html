@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Case 03 – Design under fluctuating territorial water availability</title>
+<style>
+:root{
+  --bg:#f2f0ec;
+  --paper:#fbfaf7;
+  --ink:#171717;
+  --muted:#70706c;
+  --line:#d8d5cf;
+  --accent:#b53c31;
+  --soft:#eee9e2;
+  --agri:#bfd1a8;
+  --urban:#c2cbd0;
+  --recreation:#e2d7a8;
+  --collector:#8bb7cf;
+  --restricted:#eee9e2;
+  --shadow:0 10px 30px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{padding:20px}
+.app{max-width:1520px;margin:0 auto;display:grid;gap:14px}
+.panel{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+header{padding:24px 26px 20px}
+h1,h2,h3,p{margin:0}
+h1{font-size:34px;line-height:1.03;letter-spacing:-.035em;font-weight:700}
+.subtitle{margin-top:8px;color:var(--muted);max-width:1120px;font-size:14px;line-height:1.45}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);margin-top:18px}
+.step{padding:12px 10px;border-right:1px solid var(--line);font-size:12px}.step:last-child{border-right:0}.step b{display:block;font-size:11px;color:var(--accent);margin-bottom:3px;letter-spacing:.08em}
+.layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:14px;align-items:start}
+.controls{position:sticky;top:14px}.controls .inner,.section .inner{padding:16px}
+.control{margin-bottom:15px}label{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+select,input,button{font:inherit}select,input[type=number]{width:100%;padding:10px 11px;border:1px solid var(--line);background:white}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.value{font-variant-numeric:tabular-nums;font-weight:700;min-width:62px;text-align:right}
+button{border:1px solid var(--ink);background:var(--ink);color:white;padding:9px 11px;cursor:pointer}button.secondary{background:white;color:var(--ink)}
+.buttonrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.note{font-size:12px;color:#5f5149;background:#f3e9e3;border-left:3px solid var(--accent);padding:10px 11px;line-height:1.45}
+.main{display:grid;gap:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding:13px 16px}.section-title h2{font-size:17px;letter-spacing:-.02em}
+.kicker{font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}.small{font-size:12px;color:var(--muted);line-height:1.42}
+.state-wrap{display:grid;grid-template-columns:minmax(280px,1.1fr) minmax(250px,.9fr);gap:18px;align-items:start}.state-card{border:1px solid var(--line);background:white;padding:10px}.state-card svg{width:100%;height:auto;display:block}
+.state-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}.meta{border-top:1px solid var(--line);padding-top:8px}.meta span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.meta b{display:block;margin-top:2px;font-size:13px}
+.land-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.land-use-card{border:1px solid var(--line);background:white;padding:9px}.land-use-card>strong{display:block;font-size:12px;margin-bottom:7px}.land-use-card label{font-size:9px;margin-bottom:3px}.land-use-card input{padding:7px}.land-use-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px}.mix-sum{margin-top:5px;font-size:11px;color:var(--muted)}
+.demand-variable-grid{display:grid;gap:7px}.demand-variable-row{display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:7px}.demand-variable-row:first-child{border-top:0;padding-top:0}.demand-variable-row b{font-size:11px;font-weight:600}.demand-variable-row input{width:100%;padding:7px;border:1px solid var(--line);background:white}.priority-card{border:1px solid var(--line);background:white;padding:10px;margin-bottom:8px}.priority-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:5px}.priority-head b{font-size:12px}.priority-head span{font-size:12px;font-weight:700}
+.priority-scale{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.055em;margin-top:4px}.demand-explain{margin-top:10px;border:1px solid var(--line);background:#fff;padding:11px}.demand-explain b{font-size:12px}.demand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.demand-item{border-top:2px solid var(--ink);padding-top:6px}.demand-item span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.demand-item strong{display:block;font-size:15px;margin-top:2px}.rule-card{margin-top:10px;border:1px solid var(--line);background:#fff;padding:10px;font-size:11px;line-height:1.45;color:var(--muted)}.rule-card b{color:var(--ink);font-size:12px}
+.formula{font-family:Georgia,serif;font-size:17px;background:#f7f4ef;border:1px solid var(--line);padding:10px 12px;line-height:1.45}.formula-read{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.formula-read>div{border:1px solid var(--line);background:white;padding:9px}.formula-read b{display:block;font-size:11px;margin-bottom:3px}.formula-read span{font-size:10px;color:var(--muted);line-height:1.35;display:block}
+.balance{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.metric{border:1px solid var(--line);background:white;padding:8px}.metric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.metric b{font-size:15px;display:block;margin-top:2px}
+.restriction-list{display:grid;gap:8px;margin-top:10px}.restriction-row{display:grid;grid-template-columns:125px 1fr 58px;gap:8px;align-items:center;font-size:12px}.bar{height:12px;border:1px solid var(--line);background:#f2f2ee;overflow:hidden;position:relative}.fill{display:block;height:100%;min-width:2px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted)}.leg{display:flex;align-items:center;gap:5px}.dot{width:11px;height:11px;border:1px solid #b9b2a8}.hatch{background:repeating-linear-gradient(135deg,#fff 0 3px,var(--accent) 3px 5px)}
+.family-card{border:1px solid var(--line);background:white;padding:10px;display:grid;gap:6px}.family-card b{font-size:13px}.family-card svg{width:100%;height:auto;display:block}.summaryline{font-size:11px;color:var(--muted);line-height:1.4}
+.subsection{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}.subsection:first-child{border-top:0;padding-top:0;margin-top:0}.subhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}.subhead b{font-size:13px;letter-spacing:.02em}
+.field-stage{display:grid;grid-template-columns:minmax(240px,.72fr) 52px minmax(0,2fr);gap:10px;align-items:center}.stage-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px}.arrow-box{font-size:34px;text-align:center;color:var(--accent);line-height:1;font-weight:300}
+.same-horizon{border-left:3px solid var(--accent);padding:8px 10px;background:#f7f2ed;margin:10px 0 12px;font-size:12px;line-height:1.4}
+.recursive-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:start;margin-bottom:10px}.recursive-controls .control{margin:0;border:1px solid var(--line);background:white;padding:10px}.recursive-stage{display:grid;grid-template-columns:minmax(240px,.72fr) 80px minmax(0,2fr);gap:10px;align-items:center}.future-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rec-arrow{text-align:center;color:var(--accent);font-size:11px;line-height:1.25}.rec-arrow strong{display:block;font-size:30px;font-weight:400;line-height:1;margin:3px 0}
+.design-use{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.use-card{border:1px solid var(--line);background:white;padding:11px}.use-card b{font-size:12px}.use-card p{font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.footer{font-size:11px;color:var(--muted);padding:12px 16px}.warning{color:var(--accent);font-weight:700}.water-line{margin-top:10px;padding:10px;border:1px solid var(--line);background:white}.waterbar{height:18px;border:1px solid var(--line);background:#eee;overflow:hidden;position:relative}.waterbar:after{content:'';position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--ink);opacity:.55}.waterfill{height:100%;background:var(--collector)}.variablefill{height:100%;background:var(--variables)}.waterlabel,.range-axis{display:grid;grid-template-columns:1fr 1fr 1fr;font-size:10px;color:var(--muted);margin-top:4px}.waterlabel span:nth-child(2),.range-axis span:nth-child(2){text-align:center;font-weight:700;color:var(--ink)}.waterlabel span:last-child,.range-axis span:last-child{text-align:right}.range-wrap{position:relative}.range-midmark{position:absolute;left:50%;top:1px;bottom:4px;width:1px;background:var(--ink);opacity:.45;pointer-events:none}.policy-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:8px}
+
+.transition-block{border:1px solid var(--line);background:#fff;padding:14px;margin-top:14px}
+.transition-block:first-of-type{margin-top:0}
+.transition-block-head{display:grid;grid-template-columns:minmax(140px,.35fr) minmax(320px,1.15fr) minmax(260px,.85fr);gap:18px;align-items:start;border-bottom:1px solid #e4e4df;padding-bottom:12px;margin-bottom:14px}
+.transition-block-head b{display:block;font-size:16px;font-weight:600;letter-spacing:-.015em;margin-top:3px}
+.transition-index{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--time)}
+.transition-variable{margin:0}
+.transition-variable label{margin-bottom:5px}
+.sample-note{font-size:9.5px;color:var(--muted);margin-top:5px;letter-spacing:.02em}
+.trajectory-continuation{display:grid;grid-template-columns:80px 1fr;gap:16px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin-top:18px}
+.trajectory-continuation .ellipsis{font-size:48px;line-height:.7;letter-spacing:.12em;text-align:center;font-weight:300}
+.trajectory-continuation b{display:block;font-size:13px;font-weight:600}
+.trajectory-continuation span{display:block;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:4px;max-width:760px}
+.single-result{max-width:100%}
+
+@media(max-width:900px){.field-stage,.recursive-stage,.transition-block-head{grid-template-columns:1fr}.arrow-box,.rec-arrow{transform:rotate(90deg);padding:6px}}
+@media(max-width:1200px){.layout{grid-template-columns:1fr}.controls{position:static}}
+@media(max-width:1100px){.grid2{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.step{border-right:0;border-bottom:1px solid var(--line)}.grid3,.future-grid{grid-template-columns:1fr}.state-wrap,.field-stage,.recursive-stage{grid-template-columns:1fr}.arrow-box,.rec-arrow{transform:rotate(90deg);padding:6px}.balance{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.land-inputs,.recursive-controls,.balance,.design-use,.formula-read{grid-template-columns:1fr}.state-meta{grid-template-columns:1fr}.land-use-fields{grid-template-columns:1fr 1fr}}
+</style>
+<style id="thesis-unified-ui">
+/* --- Thesis unified interface: common visual language across all three cases --- */
+:root{
+  --bg:#ffffff;
+  --paper:#ffffff;
+  --ink:#161616;
+  --muted:#6c6c68;
+  --line:#d9d9d4;
+  --soft:#f7f7f4;
+  --state:#f07b36;
+  --variables:#3eaa57;
+  --transform:#52a6f2;
+  --family:#a34aa3;
+  --time:#1d1d1d;
+  --shadow:none;
+}
+html,body{background:var(--bg);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+body{padding:24px}
+.app{max-width:1440px;gap:22px}
+.panel{background:var(--paper);border:1px solid var(--line);box-shadow:none}
+header.panel{border:0;border-bottom:1px solid var(--ink);padding:20px 0 18px}
+header .kicker{color:var(--ink);font-size:10px;letter-spacing:.16em}
+h1{font-size:32px;line-height:1.08;letter-spacing:-.035em;font-weight:500}
+.subtitle{margin-top:9px;max-width:960px;font-size:13px;line-height:1.5;color:var(--muted)}
+.steps{margin-top:20px;border-top:1px solid var(--line)}
+.step{padding:10px 12px 8px;border-right:0;border-left:1px solid #ecece8;font-size:11px;color:var(--muted)}
+.step:first-child{border-left:0}
+.step b{font-size:10px;margin-bottom:4px;letter-spacing:.12em}
+.steps .step:nth-child(1) b{color:var(--state)}
+.steps .step:nth-child(2) b{color:var(--variables)}
+.steps .step:nth-child(3) b{color:var(--transform)}
+.steps .step:nth-child(4) b{color:var(--family)}
+.steps .step:nth-child(5) b{color:var(--time)}
+.layout{grid-template-columns:350px minmax(0,1fr);gap:22px}
+.controls{top:18px}
+.controls.panel{background:#fafaf8;border-color:#e1e1dc}
+.controls .inner,.section .inner{padding:18px}
+.control{margin-bottom:17px}
+label{font-size:9.5px;letter-spacing:.09em;line-height:1.3}
+select,input[type=number]{padding:9px 10px;border:1px solid #cfcfca;background:#fff;border-radius:0}
+input[type=range]{accent-color:var(--ink)}
+button{padding:9px 11px;border-radius:0;font-size:11px;letter-spacing:.03em}
+.note{background:transparent;color:var(--muted);border-left:1px solid var(--ink);padding:8px 0 8px 12px;font-size:11px;line-height:1.5}
+.main{gap:22px}
+.grid2{gap:22px}
+.grid3,.future-grid{gap:12px}
+.section{border-color:#dfdfda}
+.section.step-12{border-top:2px solid transparent;border-image:linear-gradient(90deg,var(--state) 0 50%,var(--variables) 50% 100%) 1}
+.section.step-transform{border-top:2px solid var(--transform)}
+.section.step-family{border-top:2px solid var(--family)}
+.section.step-time{border-top:2px solid var(--time)}
+.section-title{padding:11px 16px 10px;border-bottom:1px solid #e4e4df}
+.section-title h2{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.section-title .small{max-width:52%;text-align:right}
+.kicker{font-size:9.5px;letter-spacing:.13em}
+.small{font-size:11px;line-height:1.45}
+.section.step-12 .kicker .n-state{color:var(--state)}
+.section.step-12 .kicker .n-var{color:var(--variables)}
+.section.step-transform .kicker{color:var(--transform)}
+.section.step-family .kicker{color:var(--family)}
+.section.step-time .kicker{color:var(--time)}
+.state-card,.node,.family-card,.facade-box,.metric,.use-card,.how-read-item,.land-use-card,.priority-card,
+.formula-read>div,.water-line{border-color:#deded9;box-shadow:none}
+.family-card,.state-card,.node,.facade-box,.metric,.use-card,.how-read-item{background:#fff}
+.meta{border-top:1px solid #dadad5}
+.meta span{font-size:9px;letter-spacing:.09em}
+.meta b{font-size:12px;font-weight:500}
+.formula{background:#fafaf7;border-color:#deded9;font-size:16px}
+.same-horizon{background:transparent;border-left:1px solid var(--family);padding:8px 0 8px 12px}
+.rule-card{background:transparent;border-color:#deded9}
+.subsection{border-top:1px solid #deded9;padding-top:18px;margin-top:18px}
+.subhead{margin-bottom:12px}
+.subhead b{font-size:12px;font-weight:600}
+.stage-label{font-size:9.5px;letter-spacing:.11em}
+.arrow-box{color:var(--ink);font-weight:300}
+.rec-arrow{color:var(--ink)}
+.method-strip{margin-top:12px;padding-top:10px;border-top:1px solid #deded9;font-size:10.5px;line-height:1.5;color:var(--muted)}
+.method-strip b{color:var(--ink);font-weight:600}
+.method-strip .method-row{display:block;margin-top:2px}
+.design-use{gap:12px}
+.use-card{padding:12px}
+.use-card b{font-size:11px;font-weight:600}
+.use-card p{font-size:10.5px;line-height:1.5}
+.footer{border:0;border-top:1px solid var(--line);padding:10px 0;color:#8a8a84}
+.legend{font-size:15px;gap:18px;margin-top:12px}
+.leg{display:flex;align-items:center;gap:8px;font-size:15px;line-height:1.2}
+.dot{width:16px;height:16px;flex:0 0 16px}
+@media(max-width:1200px){.layout{grid-template-columns:1fr}.controls{position:static}}
+</style></head>
+<body>
+<div class="app">
+<header class="panel">
+<h1>Case 03 – Design under fluctuating territorial water availability</h1>
+<p class="subtitle">A territorial-scale demonstrator of the Probabilistic Design Framework.</p>
+<div class="steps">
+<div class="step"><b>01</b>Current state</div>
+<div class="step"><b>02</b>Variables</div>
+<div class="step"><b>03</b>Probabilistic transformation</div>
+<div class="step"><b>04</b>Family of possible states</div>
+<div class="step"><b>05</b>Recursive temporal update</div>
+</div>
+</header>
+<div class="layout">
+<aside class="panel controls">
+<div class="inner">
+<div class="control">
+<label for="gridSize">Current-state attribute · territorial field</label>
+<select id="gridSize">
+<option value="8">8 × 8</option>
+<option selected="" value="10">10 × 10</option>
+<option value="12">12 × 12</option>
+</select>
+</div>
+<div class="control">
+<label>Current-state attributes · land-use mix</label>
+<div class="land-inputs">
+<div class="land-use-card"><strong>Agriculture</strong><div><label for="mixAgri">Land-use %</label><input id="mixAgri" max="100" min="0" type="number" value="55"/></div></div>
+<div class="land-use-card"><strong>Urban</strong><div><label for="mixUrban">Land-use %</label><input id="mixUrban" max="100" min="0" type="number" value="25"/></div></div>
+<div class="land-use-card"><strong>Recreational</strong><div><label for="mixRec">Land-use %</label><input id="mixRec" max="100" min="0" type="number" value="20"/></div></div>
+</div>
+<div class="mix-sum" id="mixSum">Input weights: 100% · internally normalized to 100%</div>
+</div>
+<div class="control">
+<label>Current-state design parameters · protection priorities · higher % = more protected</label>
+<div class="priority-card">
+<div class="priority-head"><b>Agriculture</b><span id="protectAgriVal">75%</span></div>
+<input id="protectAgri" max="100" min="0" type="range" value="75"/>
+<div class="priority-scale">higher value → lower restriction</div>
+</div>
+<div class="priority-card">
+<div class="priority-head"><b>Urban</b><span id="protectUrbanVal">55%</span></div>
+<input id="protectUrban" max="100" min="0" type="range" value="55"/>
+<div class="priority-scale">higher value → lower restriction</div>
+</div>
+<div class="priority-card">
+<div class="priority-head"><b>Recreational</b><span id="protectRecVal">20%</span></div>
+<input id="protectRec" max="100" min="0" type="range" value="20"/>
+<div class="priority-scale">higher value → lower restriction</div>
+</div>
+</div>
+<div class="control">
+<label>Internal variables · land-use water demand · T0 → T1</label>
+<div class="demand-variable-grid">
+<div class="demand-variable-row"><b>Agriculture</b><input id="demandAgri" min="0" step="0.05" type="number" value="1.40" aria-label="Agriculture water demand units per cell"/></div>
+<div class="demand-variable-row"><b>Urban</b><input id="demandUrban" min="0" step="0.05" type="number" value="1.00" aria-label="Urban water demand units per cell"/></div>
+<div class="demand-variable-row"><b>Recreational</b><input id="demandRec" min="0" step="0.05" type="number" value="0.55" aria-label="Recreational water demand units per cell"/></div>
+</div>
+<div class="policy-note">Units per active cell. These internal variables can change between temporal intervals without changing the land-use configuration itself.</div>
+</div>
+<div class="control">
+<label for="water1">External variable · water availability · T0 → T1</label>
+<div class="row"><div><div class="range-wrap"><input id="water1" max="200" min="0" type="range" value="70"/><span class="range-midmark"></span></div><div class="range-axis"><span>0%</span><span>100% · reference demand</span><span>200%</span></div></div><span class="value" id="water1Val">70%</span></div>
+</div>
+
+<div class="control">
+<label for="seed">Stochastic seed</label>
+<input id="seed" type="number" value="21"/>
+</div>
+<div class="buttonrow">
+<button id="run">Update</button>
+<button class="secondary" id="random">New seed</button>
+</div>
+<div style="height:12px"></div>
+<div class="note"><b>Methodological note.</b> Water demand per active cell is treated separately as an internal variable because operational consumption can change while the territorial land-use configuration and protection priorities remain unchanged. Agriculture, urban and recreational demand can therefore be redefined at each temporal interval. The default values are illustrative rather than calibrated real-world coefficients. A restricted cell contributes zero demand during that interval. Water-collection cells are persistent and each stores up to 8 water units for the following interval.</div>
+</div>
+</aside>
+<main class="main">
+<div class="grid2">
+<section class="panel section step-12">
+<div class="section-title">
+<div><div class="kicker"><span class="n-state">01</span> + <span class="n-var">02</span></div><h2>Current state + variables</h2></div>
+<div class="small">territorial state at T0 + inherited design priorities + internal and external variables</div>
+</div>
+<div class="inner state-wrap">
+<div>
+<div class="state-card" id="initialStateCard"></div>
+<div class="legend">
+<span class="leg"><span class="dot" style="background:var(--agri)"></span>agriculture</span>
+<span class="leg"><span class="dot" style="background:var(--urban)"></span>urban</span>
+<span class="leg"><span class="dot" style="background:var(--recreation)"></span>recreational</span>
+<span class="leg"><span class="dot" style="background:var(--collector)"></span>water collector</span>
+<span class="leg"><span class="dot hatch"></span>restricted</span>
+</div>
+</div>
+<div>
+<div class="state-meta">
+<div class="meta"><span>Territorial cells</span><b id="metaCells">100</b></div>
+<div class="meta"><span>Demand · T0 → T1</span><b id="metaDemand">0</b></div>
+<div class="meta"><span>Agriculture</span><b id="metaAgri">0 cells</b></div>
+<div class="meta"><span>Urban</span><b id="metaUrban">0 cells</b></div>
+<div class="meta"><span>Recreational</span><b id="metaRec">0 cells</b></div>
+<div class="meta"><span>Stored reserve</span><b>0.0 units</b></div>
+</div>
+<div class="water-line">
+<div class="small" style="margin-bottom:6px">Current-state design parameters · protection priorities</div>
+<div class="demand-grid">
+<div class="demand-item"><span>Agriculture</span><strong id="initialProtectAgri">75%</strong></div>
+<div class="demand-item"><span>Urban</span><strong id="initialProtectUrban">55%</strong></div>
+<div class="demand-item"><span>Recreational</span><strong id="initialProtectRec">20%</strong></div>
+</div>
+</div>
+<div class="water-line">
+<div class="small" style="margin-bottom:6px">Internal variables · water demand per active cell · T0 → T1</div>
+<div class="demand-grid">
+<div class="demand-item"><span>Agriculture</span><strong id="initialDemandAgri">1.40</strong></div>
+<div class="demand-item"><span>Urban</span><strong id="initialDemandUrban">1.00</strong></div>
+<div class="demand-item"><span>Recreational</span><strong id="initialDemandRec">0.55</strong></div>
+</div>
+<div class="small" style="margin-top:6px">units / active cell</div>
+</div>
+<div class="water-line">
+<div class="small" style="margin-bottom:6px">External variable · water availability · T0 → T1</div>
+<div class="waterbar"><div class="variablefill" id="initialWaterBar" style="width:35%"></div></div>
+<div class="waterlabel"><span>0%</span><span>100%</span><span>200%</span></div><div class="small" style="margin-top:5px">Current setting: <b id="initialWaterText">70%</b></div>
+</div>
+</div>
+</div>
+</section>
+<section class="panel section step-transform">
+<div class="section-title">
+<div><div class="kicker">03</div><h2>Probabilistic transformation</h2></div>
+<div class="small">current-state priorities + water balance → stochastic spatial allocation</div>
+</div>
+<div class="inner">
+<div class="formula">D<sub>t</sub> = Σ N<sub>i,t</sub> · q<sub>i,t</sub>  ·  W<sub>t</sub> = A<sub>t</sub> + R<sub>t</sub>  ·  ΔW = max(0, D<sub>t</sub> − W<sub>t</sub>)</div>
+<div class="formula-read">
+<div><b>1 · Territorial demand</b><span><strong>D<sub>t</sub></strong> is the sum of active cells <strong>N<sub>i,t</sub></strong> multiplied by the internal water-demand variable <strong>q<sub>i,t</sub></strong> assigned to each land-use category.</span></div>
+<div><b>2 · Water available</b><span><strong>W<sub>t</sub></strong> combines external water availability <strong>A<sub>t</sub></strong> with any stored reserve inherited from the previous state <strong>R<sub>t</sub></strong>.</span></div>
+<div><b>3 · Deficit to restrict</b><span><strong>ΔW</strong> is the shortage that remains when demand exceeds available water. If there is no shortage, ΔW = 0 and surplus water may instead be stored.</span></div>
+</div>
+<div class="balance" id="balanceMetrics"></div>
+<div class="restriction-list" id="restrictionList"></div>
+<p class="small" style="margin-top:10px">The model first calculates territorial demand from the current land-use state and the three internal water-demand variables, then compares this demand with external water availability and inherited reserve. Any resulting deficit is distributed among land uses according to the protection priorities. These quantities define the transition; the seed determines the sampled spatial location of affected cells.</p>
+<div class="method-strip"><span class="method-row"><b>Transformation set · </b>temporarily restrict use · convert land-use cell to water-collection cell · reactivate use when conditions improve</span></div></div>
+</section>
+</div>
+<section class="panel section step-family">
+<div class="section-title">
+<div><div class="kicker">04</div><h2>Family of possible states</h2></div>
+<div class="small">same current state + same variables · one sampled spatial realization</div>
+</div>
+<div class="inner">
+<div class="field-stage">
+<div>
+<div class="stage-label">Current territory · T0</div>
+<div class="state-card" id="currentField"></div>
+</div>
+<div class="arrow-box">→</div>
+<div>
+<div class="stage-label">Possible territorial states · T1</div>
+<div class="single-result" id="futureField"></div>
+</div>
+</div>
+<div class="same-horizon"><b>T0 → T1 produces one stochastic realization.</b> The same water balance can produce other spatial allocations when the seed changes; this interface follows one sampled path at a time.</div>
+<div class="rule-card"><b>Water-collector siting rule.</b> When surplus water requires new storage capacity, any agricultural, urban or recreational cell may be converted into a collector. Suitability is influenced first by the protection priority assigned to its current land use: lower protection means greater susceptibility to conversion. Among otherwise suitable cells, locations further from existing or newly selected collectors receive a higher score, encouraging a distributed territorial storage network. The seed introduces variation among high-scoring candidates, so the <em>number</em> of collectors is fixed by the water surplus while their exact location can vary between realizations. This is an illustrative design heuristic rather than a calibrated hydrological model.</div>
+
+
+</div>
+</section><section class="panel section step-time"><div class="section-title"><div><div class="kicker">05</div><h2>Recursive temporal update</h2></div><div class="small">one realized state becomes the next current state; persistent storage is inherited</div></div><div class="inner"><div class="subsection">
+
+<div class="transition-block">
+<div class="transition-block-head">
+<div><span class="transition-index">Transition 02</span><b>T1 → T2</b></div>
+<div class="control transition-variable">
+<label>Internal variables · land-use water demand · T1 → T2</label>
+<div class="demand-variable-grid">
+<div class="demand-variable-row"><b>Agriculture</b><input id="demandAgri2" min="0" step="0.05" type="number" value="1.40"/></div>
+<div class="demand-variable-row"><b>Urban</b><input id="demandUrban2" min="0" step="0.05" type="number" value="1.00"/></div>
+<div class="demand-variable-row"><b>Recreational</b><input id="demandRec2" min="0" step="0.05" type="number" value="0.55"/></div>
+</div>
+</div>
+<div class="control transition-variable">
+<label for="water2">External variable · water availability · T1 → T2</label>
+<div class="row"><div><div class="range-wrap"><input id="water2" max="200" min="0" type="range" value="115"/><span class="range-midmark"></span></div><div class="range-axis"><span>0%</span><span>100% · reference demand</span><span>200%</span></div></div><span class="value" id="water2Val">115%</span></div>
+</div>
+</div>
+<div class="recursive-stage">
+<div>
+<div class="stage-label">Observed state · T1</div>
+<div class="state-card" id="observedField"></div>
+</div>
+<div class="rec-arrow"><span>state + reserve<br/>are inherited</span><strong>→</strong><span>sample once</span></div>
+<div>
+<div class="stage-label" id="t2FamilyLabel">New family of possible states · T2</div>
+<div class="state-card" id="t2Field"></div>
+<div class="sample-note">one sampled territorial realization shown</div>
+</div>
+</div>
+</div>
+
+<div class="transition-block">
+<div class="transition-block-head">
+<div><span class="transition-index">Transition 03</span><b>T2 → T3</b></div>
+<div class="control transition-variable">
+<label>Internal variables · land-use water demand · T2 → T3</label>
+<div class="demand-variable-grid">
+<div class="demand-variable-row"><b>Agriculture</b><input id="demandAgri3" min="0" step="0.05" type="number" value="1.25"/></div>
+<div class="demand-variable-row"><b>Urban</b><input id="demandUrban3" min="0" step="0.05" type="number" value="1.05"/></div>
+<div class="demand-variable-row"><b>Recreational</b><input id="demandRec3" min="0" step="0.05" type="number" value="0.60"/></div>
+</div>
+</div>
+<div class="control transition-variable">
+<label for="water3">External variable · water availability · T2 → T3</label>
+<div class="row"><div><div class="range-wrap"><input id="water3" max="200" min="0" type="range" value="80"/><span class="range-midmark"></span></div><div class="range-axis"><span>0%</span><span>100% · reference demand</span><span>200%</span></div></div><span class="value" id="water3Val">80%</span></div>
+</div>
+</div>
+<div class="recursive-stage">
+<div>
+<div class="stage-label">Observed state · T2</div>
+<div class="state-card" id="t2InheritedField"></div>
+</div>
+<div class="rec-arrow"><span>state + reserve<br/>are inherited</span><strong>→</strong><span>sample once</span></div>
+<div>
+<div class="stage-label" id="t3FamilyLabel">New family of possible states · T3</div>
+<div class="state-card" id="t3Field"></div>
+<div class="sample-note">one sampled territorial realization shown</div>
+</div>
+</div>
+</div>
+
+<div class="trajectory-continuation">
+<div class="ellipsis">…</div>
+<div><b>T3 → T4 → … → Tn</b><span>The same probabilistic update can be repeated for as many successive states as required, redefining internal demand and external water availability at each transition.</span></div>
+</div>
+
+</div>
+</div></section>
+<section class="panel footer">Probabilistic Design Framework · illustrative demonstrator</section>
+</main>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const COLORS={agri:'#bfd1a8',urban:'#c2cbd0',rec:'#e2d7a8',collector:'#8bb7cf'};
+const REF_NEEDS={agri:1.40,urban:1.00,rec:0.55};
+function demandVariables(step=1){const ids=step===3?{agri:'demandAgri3',urban:'demandUrban3',rec:'demandRec3'}:step===2?{agri:'demandAgri2',urban:'demandUrban2',rec:'demandRec2'}:{agri:'demandAgri',urban:'demandUrban',rec:'demandRec'};return {agri:Math.max(0,+$(ids.agri).value||0),urban:Math.max(0,+$(ids.urban).value||0),rec:Math.max(0,+$(ids.rec).value||0)}}
+function demandIntensity(use,needs){if(use==='collector')return 0;return Math.max(0,needs?.[use]??0)}
+const COLLECT_CAP=8;
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function normWeights(arr){const clean=arr.map(v=>Math.max(0,+v||0));const s=clean.reduce((a,b)=>a+b,0);return s?clean.map(v=>v/s):arr.map(()=>1/arr.length)}
+function largestRemainder(total,weights){
+  if(total<=0)return weights.map(()=>0);
+  const raw=weights.map(w=>w*total),base=raw.map(Math.floor);let rem=total-base.reduce((a,b)=>a+b,0);
+  const order=raw.map((v,i)=>({i,r:v-base[i]})).sort((a,b)=>b.r-a.r);
+  for(let k=0;k<rem;k++)base[order[k%order.length].i]++;
+  return base;
+}
+function inputMix(){return normWeights([+$('mixAgri').value,+$('mixUrban').value,+$('mixRec').value])}
+function makeInitialState(seedOffset=0){
+  const n=+$('gridSize').value,total=n*n,weights=inputMix(),counts=largestRemainder(total,weights),uses=[];
+  ['agri','urban','rec'].forEach((u,i)=>{for(let k=0;k<counts[i];k++)uses.push(u)});
+  const rng=mulberry32(13091+seedOffset*3571);
+  for(let i=uses.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[uses[i],uses[j]]=[uses[j],uses[i]]}
+  const cells=uses.map((use,i)=>({i,use,restricted:false,sourceUse:null}));
+  return {cells,storage:0};
+}
+function cloneState(state){return{cells:state.cells.map(c=>({...c})),storage:state.storage}}
+function fullDemand(state,needs){return state.cells.reduce((s,c)=>s+demandIntensity(c.use,needs),0)}
+function activeDemand(state,needs){return state.cells.reduce((s,c)=>s+(c.restricted?0:demandIntensity(c.use,needs)),0)}
+function countUse(state,use){return state.cells.filter(c=>c.use===use).length}
+function collectorCount(state){return countUse(state,'collector')}
+function storageCapacity(state){return collectorCount(state)*COLLECT_CAP}
+function referenceDemand(){return fullDemand(makeInitialState(0),REF_NEEDS)}
+function resetRestrictions(state){state.cells.forEach(c=>c.restricted=false)}
+function protection(){return {agri:+$('protectAgri').value,urban:+$('protectUrban').value,rec:+$('protectRec').value}}
+function restrictionPlan(state,deficit,needs){
+  const uses=['agri','urban','rec'],p=protection();
+  const availableDemand=uses.map(u=>countUse(state,u)*demandIntensity(u,needs));
+  const pressure=uses.map(u=>Math.max(.05,1-p[u]/100));
+  const cut=[0,0,0];let remaining=Math.max(0,deficit),active=[0,1,2];let guard=0;
+  while(remaining>1e-9 && active.length && guard++<20){
+    const scores=active.map(i=>pressure[i]*Math.max(.0001,availableDemand[i]-cut[i]));
+    let sum=scores.reduce((a,b)=>a+b,0);if(sum<=0)sum=active.length;
+    let saturated=[];
+    active.forEach((i,idx)=>{
+      const share=remaining*(scores[idx]/sum),room=Math.max(0,availableDemand[i]-cut[i]);
+      if(share>=room-1e-9){cut[i]+=room;saturated.push(i)}else cut[i]+=share;
+    });
+    const totalCut=cut.reduce((a,b)=>a+b,0);
+    remaining=Math.max(0,deficit-totalCut);
+    active=active.filter(i=>!saturated.includes(i));
+    if(!saturated.length)break;
+  }
+  let counts=uses.map((u,i)=>Math.min(countUse(state,u),Math.floor(cut[i]/Math.max(.0001,demandIntensity(u,needs)))));
+  let saved=counts.reduce((s,c,i)=>s+c*demandIntensity(uses[i],needs),0);
+  // Add deterministic extra cells until the discrete grid meets the required saving.
+  while(saved+1e-9<deficit){
+    let best=-1,bestScore=-Infinity;
+    uses.forEach((u,i)=>{
+      if(counts[i]<countUse(state,u)){
+        const score=pressure[i]/Math.max(.0001,demandIntensity(u,needs));
+        if(score>bestScore){bestScore=score;best=i}
+      }
+    });
+    if(best<0)break;
+    counts[best]++;saved+=demandIntensity(uses[best],needs);
+  }
+  return {uses,counts,saved,cutUnits:cut};
+}
+function gridXY(i,n){return{x:i%n,y:Math.floor(i/n)}}
+function neighbourScore(idx,n,selectedSet){
+  const {x,y}=gridXY(idx,n);let s=0;
+  [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<n&&ny<n&&selectedSet.has(ny*n+nx))s++});return s;
+}
+function chooseCells(state,use,count,rng,mode='restriction'){
+  const n=+$('gridSize').value,candidates=state.cells.filter(c=>c.use===use && !c.restricted),selected=[];const selectedSet=new Set();
+  for(let k=0;k<count && candidates.length;k++){
+    const scored=candidates.map(c=>{
+      const {x,y}=gridXY(c.i,n);let score=rng()*1.35;
+      if(mode==='restriction') score+=neighbourScore(c.i,n,selectedSet)*1.8 + (use==='agri'?Math.abs(x-(n-1)/2)*.04:0);
+      if(mode==='collector'){
+        const priorityExposure=collectorProtectionScore(use);
+        const dispersion=collectorDistanceScore(c.i,n,state,selectedSet);
+        score+=priorityExposure*4.0 + dispersion*2.5;
+      }
+      return {c,score};
+    }).sort((a,b)=>b.score-a.score);
+    const pick=scored[Math.floor(rng()*Math.min(3,scored.length))].c;selected.push(pick);selectedSet.add(pick.i);candidates.splice(candidates.indexOf(pick),1);
+  }
+  return selected;
+}
+function applyRestrictions(state,plan,rng){
+  plan.uses.forEach((u,i)=>chooseCells(state,u,plan.counts[i],rng,'restriction').forEach(c=>c.restricted=true));
+}
+function collectorDistanceScore(idx,n,state,selectedSet){
+  const {x,y}=gridXY(idx,n);
+  const refs=[];
+  state.cells.forEach(c=>{if(c.use==='collector')refs.push(gridXY(c.i,n))});
+  selectedSet.forEach(i=>refs.push(gridXY(i,n)));
+  if(!refs.length)return 0.5;
+  let minD=Infinity;
+  refs.forEach(p=>{const dx=x-p.x,dy=y-p.y;minD=Math.min(minD,Math.sqrt(dx*dx+dy*dy))});
+  const maxD=Math.sqrt(2)*Math.max(1,n-1);
+  return clamp(minD/maxD,0,1);
+}
+function collectorProtectionScore(use){
+  const p=protection();
+  return clamp(1-(p[use]??100)/100,0,1);
+}
+function addCollectors(state,count,rng){
+  const n=+$('gridSize').value;
+  const candidates=state.cells.filter(c=>c.use!=='collector');
+  const selected=[];
+  const selectedSet=new Set();
+  for(let k=0;k<count && candidates.length;k++){
+    const scored=candidates.map(c=>{
+      const priorityExposure=collectorProtectionScore(c.use);
+      const dispersion=collectorDistanceScore(c.i,n,state,selectedSet);
+      const stochastic=rng();
+      // Lower protection makes conversion more likely; greater distance encourages distributed storage.
+      const score=priorityExposure*4.0 + dispersion*2.5 + stochastic*0.9;
+      return {c,score};
+    }).sort((a,b)=>b.score-a.score);
+    const pool=Math.min(3,scored.length);
+    const pick=scored[Math.floor(rng()*pool)].c;
+    selected.push(pick);
+    selectedSet.add(pick.i);
+    candidates.splice(candidates.indexOf(pick),1);
+  }
+  selected.forEach(cell=>{cell.sourceUse=cell.use;cell.use='collector';cell.restricted=false});
+  return selected.length;
+}
+function evolveState(start,waterPct,seedOffset=0,needs=null){
+  const state=cloneState(start);resetRestrictions(state);
+  const rng=mulberry32((+$('seed').value||1)+seedOffset*7919);
+  if(needs===null)needs=demandVariables(1);
+  const refD=referenceDemand(),external=refD*waterPct/100,fullD=fullDemand(state,needs),cap0=storageCapacity(state);
+  let storage=clamp(state.storage,0,cap0),reserveUsed=0,deficit0=0,plan={uses:['agri','urban','rec'],counts:[0,0,0],saved:0,cutUnits:[0,0,0]},newCollectors=0,spilled=0;
+
+  if(external<fullD){
+    reserveUsed=Math.min(storage,fullD-external);storage-=reserveUsed;
+    const usable=external+reserveUsed;deficit0=Math.max(0,fullD-usable);
+    if(deficit0>0){plan=restrictionPlan(state,deficit0,needs);applyRestrictions(state,plan,rng)}
+    const demandAfter=activeDemand(state,needs),leftover=Math.max(0,usable-demandAfter);
+    storage=Math.min(storageCapacity(state),storage+leftover);
+  }else{
+    let surplus=Math.max(0,external-fullD),needed=Math.max(0,storage+surplus-storageCapacity(state));
+    if(needed>1e-9){
+      const wanted=Math.ceil(needed/COLLECT_CAP);newCollectors=addCollectors(state,wanted,rng);
+    }
+    const demandAfter=activeDemand(state,needs),totalSurplus=Math.max(0,external-demandAfter),cap=storageCapacity(state);
+    const targetStorage=storage+totalSurplus;storage=Math.min(cap,targetStorage);spilled=Math.max(0,targetStorage-cap);
+  }
+  state.storage=storage;
+  const demandAfter=activeDemand(state,needs);
+  return {state,metrics:{referenceD:refD,external,fullD,demandAfter,reserveUsed,deficit0,plan,newCollectors,storage,capacity:storageCapacity(state),spilled,waterPct,needs:{...needs}}};
+}
+function stateSVG(state){
+  const n=+$('gridSize').value,cell=30,gap=2,pad=7,W=pad*2+n*cell+(n-1)*gap,H=W;
+  let s=`<svg viewBox="0 0 ${W} ${H}" aria-label="territorial grid"><defs><pattern id="rhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#b53c31" stroke-width="2.4" opacity=".92"/></pattern></defs><rect width="${W}" height="${H}" fill="#fbfaf7"/>`;
+  state.cells.forEach(c=>{
+    const x=pad+(c.i%n)*(cell+gap),y=pad+Math.floor(c.i/n)*(cell+gap);
+    s+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="${COLORS[c.use]}" stroke="#ffffff" stroke-width="1"/>`;
+    if(c.restricted)s+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="url(#rhatch)" stroke="#b53c31" stroke-width="1.0"/>`;
+    if(c.use==='collector'){
+      s+=`<path d="M${x+5} ${y+18} Q${x+10} ${y+12} ${x+15} ${y+18} T${x+25} ${y+18}" fill="none" stroke="#f5f9fb" stroke-width="1.6" opacity=".9"/>`;
+    }
+  });
+  return s+`</svg>`;
+}
+function useCounts(state){return {agri:countUse(state,'agri'),urban:countUse(state,'urban'),rec:countUse(state,'rec'),collector:countUse(state,'collector')}}
+function restrictedCounts(state){
+  const out={agri:0,urban:0,rec:0};state.cells.forEach(c=>{if(c.restricted&&out[c.use]!==undefined)out[c.use]++});return out;
+}
+function summary(state,metrics=null){
+  const u=useCounts(state),r=restrictedCounts(state),parts=[`Agri ${u.agri}`,`Urban ${u.urban}`,`Rec ${u.rec}`];if(u.collector)parts.push(`Collectors ${u.collector}`);
+  const restr=r.agri+r.urban+r.rec;let line=parts.join(' · ')+` · Restricted ${restr}`+` · Reserve ${state.storage.toFixed(1)}`;
+  if(metrics)line+=` / ${metrics.capacity.toFixed(0)}`;return line;
+}
+function stateCard(title,obj,tag=''){
+  const state=obj.state||obj,metrics=obj.metrics||null;
+  return `<div class="family-card"><div style="display:flex;justify-content:space-between;gap:8px"><b>${title}</b><span class="small">${tag}</span></div>${stateSVG(state)}<div class="summaryline">${summary(state,metrics)}${metrics?`<br>Demand ${metrics.demandAfter.toFixed(1)} · external water ${metrics.external.toFixed(1)} units`:''}</div></div>`;
+}
+let initialState=null,t1Obj=null,t2Obj=null,t3Obj=null;
+function renderInputs(){
+  $('water1Val').textContent=$('water1').value+'%';$('water2Val').textContent=$('water2').value+'%';
+  $('protectAgriVal').textContent=$('protectAgri').value+'%';$('protectUrbanVal').textContent=$('protectUrban').value+'%';$('protectRecVal').textContent=$('protectRec').value+'%';
+  const sum=(+$('mixAgri').value||0)+(+$('mixUrban').value||0)+(+$('mixRec').value||0);$('mixSum').innerHTML=`Input weights: ${sum}% · internally normalized to 100%${sum!==100?' <span class="warning">(not currently 100%)</span>':''}`;
+}
+function renderInitial(){
+  initialState=makeInitialState(0);$('initialStateCard').innerHTML=stateSVG(initialState);$('currentField').innerHTML=stateSVG(initialState)+`<div class="summaryline" style="margin-top:5px">${summary(initialState)}</div>`;
+  const u=useCounts(initialState),needs=demandVariables(1),d=fullDemand(initialState,needs);$('metaCells').textContent=initialState.cells.length;$('metaDemand').textContent=d.toFixed(1)+' units';$('metaAgri').textContent=u.agri+' cells';$('metaUrban').textContent=u.urban+' cells';$('metaRec').textContent=u.rec+' cells';
+  $('initialDemandAgri').textContent=needs.agri.toFixed(2);$('initialDemandUrban').textContent=needs.urban.toFixed(2);$('initialDemandRec').textContent=needs.rec.toFixed(2);
+  $('initialProtectAgri').textContent=$('protectAgri').value+'%';$('initialProtectUrban').textContent=$('protectUrban').value+'%';$('initialProtectRec').textContent=$('protectRec').value+'%';
+  const wp=+$('water1').value;$('initialWaterBar').style.width=Math.min(100,wp/2)+'%';$('initialWaterText').textContent=wp+'%';
+}
+function restrictionPercent(plan,state,i){const u=plan.uses[i],count=countUse(state,u);return count?plan.counts[i]/count*100:0}
+function renderBalance(){
+  const sample=evolveState(initialState,+$('water1').value,1,demandVariables(1)),m=sample.metrics,p=protection();
+  const usableBefore=m.external+m.reserveUsed;
+  $('balanceMetrics').innerHTML=`<div class="metric"><span>Territorial demand</span><b>${m.fullD.toFixed(1)}</b></div><div class="metric"><span>External water · ${m.waterPct}%</span><b>${m.external.toFixed(1)}</b></div><div class="metric"><span>Initial deficit</span><b>${m.deficit0.toFixed(1)}</b></div><div class="metric"><span>End reserve</span><b>${m.storage.toFixed(1)}</b></div>`;
+  const rows=[['Agriculture','agri',0,COLORS.agri],['Urban','urban',1,COLORS.urban],['Recreational','rec',2,COLORS.rec]];
+  $('restrictionList').innerHTML=rows.map(([lab,u,i,col])=>{
+    const pct=restrictionPercent(m.plan,initialState,i),prot=p[u];
+    return `<div class="restriction-row"><span>${lab}<br><span class="small">priority ${prot}% · higher = protected</span></span><span class="bar"><span class="fill" style="width:${pct.toFixed(1)}%;background:${col};box-shadow:inset -1px 0 0 rgba(0,0,0,.14)"></span></span><b>${pct.toFixed(0)}%</b></div>`;
+  }).join('') + (m.newCollectors?`<div class="small" style="margin-top:4px"><b>Surplus condition:</b> ${m.newCollectors} new water-collection cell${m.newCollectors===1?'':'s'} required.</div>`:'');
+}
+function renderFamily(){
+  const water=+$('water1').value,needs=demandVariables(1);
+  t1Obj=evolveState(initialState,water,1,needs);
+  $('futureField').innerHTML=stateCard('Sampled path',t1Obj,'T1');
+}
+function renderRecursive(){
+  if(!t1Obj)return;
+  const water2=+$('water2').value,needs2=demandVariables(2);
+  const water3=+$('water3').value,needs3=demandVariables(3);
+  $('water2Val').textContent=water2+'%';
+  $('water3Val').textContent=water3+'%';
+
+  $('observedField').innerHTML=stateSVG(t1Obj.state)+`<div class="summaryline" style="margin-top:5px">${summary(t1Obj.state,t1Obj.metrics)}<br>Demand ${t1Obj.metrics.demandAfter.toFixed(1)} · reserve ${t1Obj.state.storage.toFixed(1)}</div>`;
+  t2Obj=evolveState(t1Obj.state,water2,101,needs2);
+  $('t2FamilyLabel').textContent=`New family of possible states · T2 · water ${water2}%`;
+  $('t2Field').innerHTML=stateSVG(t2Obj.state)+`<div class="summaryline" style="margin-top:5px">${summary(t2Obj.state,t2Obj.metrics)}<br>Demand ${t2Obj.metrics.demandAfter.toFixed(1)} · reserve ${t2Obj.state.storage.toFixed(1)}</div>`;
+  $('t2InheritedField').innerHTML=stateSVG(t2Obj.state)+`<div class="summaryline" style="margin-top:5px">${summary(t2Obj.state,t2Obj.metrics)}<br>Demand ${t2Obj.metrics.demandAfter.toFixed(1)} · reserve ${t2Obj.state.storage.toFixed(1)}</div>`;
+
+  t3Obj=evolveState(t2Obj.state,water3,201,needs3);
+  $('t3FamilyLabel').textContent=`New family of possible states · T3 · water ${water3}%`;
+  $('t3Field').innerHTML=stateSVG(t3Obj.state)+`<div class="summaryline" style="margin-top:5px">${summary(t3Obj.state,t3Obj.metrics)}<br>Demand ${t3Obj.metrics.demandAfter.toFixed(1)} · reserve ${t3Obj.state.storage.toFixed(1)}</div>`;
+}
+function renderAll(){renderInputs();renderInitial();renderBalance();renderFamily();renderRecursive()}
+['gridSize','mixAgri','mixUrban','mixRec','demandAgri','demandUrban','demandRec','water1','protectAgri','protectUrban','protectRec','seed'].forEach(id=>{$(id).addEventListener('input',renderAll);$(id).addEventListener('change',renderAll)});
+['demandAgri2','demandUrban2','demandRec2','water2','demandAgri3','demandUrban3','demandRec3','water3'].forEach(id=>{$(id).addEventListener('input',renderRecursive);$(id).addEventListener('change',renderRecursive)});
+$('run').addEventListener('click',renderAll);$('random').addEventListener('click',()=>{$('seed').value=Math.floor(Math.random()*99999);renderAll()});
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Case 01 – Design under natural material aging</title>
+<style>
+:root{
+  --bg:#f2f0ec;
+  --paper:#fbfaf7;
+  --ink:#171717;
+  --muted:#70706c;
+  --line:#d8d5cf;
+  --accent:#b53c31;
+  --soft:#eee9e2;
+  --wood:#c7a06f;
+  --green:#738a74;
+  --blue:#6f8792;
+  --orange:#b98352;
+  --shadow:0 10px 30px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{padding:20px}
+.app{max-width:1520px;margin:0 auto;display:grid;gap:14px}
+.panel{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+header{padding:24px 26px 20px}
+h1,h2,h3,p{margin:0}
+h1{font-size:34px;line-height:1.03;letter-spacing:-.035em;font-weight:700}
+.subtitle{margin-top:8px;color:var(--muted);max-width:1040px;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);margin-top:18px}
+.step{padding:12px 10px;border-right:1px solid var(--line);font-size:12px}
+.step:last-child{border-right:0}
+.step b{display:block;font-size:11px;color:var(--accent);margin-bottom:3px;letter-spacing:.08em}
+.layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:14px;align-items:start}
+.controls{position:sticky;top:14px}
+.controls .inner,.section .inner{padding:16px}
+.control{margin-bottom:15px}
+label{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+select,input,button{font:inherit}
+select,input[type=number]{width:100%;padding:10px 11px;border:1px solid var(--line);background:white}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.value{font-variant-numeric:tabular-nums;font-weight:700}
+button{border:1px solid var(--ink);background:var(--ink);color:white;padding:9px 11px;cursor:pointer}
+button.secondary{background:white;color:var(--ink)}
+.buttonrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.note{font-size:12px;color:#5f5149;background:#f3e9e3;border-left:3px solid var(--accent);padding:10px 11px;line-height:1.4}
+.main{display:grid;gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding:13px 16px}
+.section-title h2{font-size:17px;letter-spacing:-.02em}
+.kicker{font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.small{font-size:12px;color:var(--muted)}
+.state-wrap{display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:center}
+.state-card{border:1px solid var(--line);background:white;padding:12px}
+.state-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meta{border-top:1px solid var(--line);padding-top:8px}
+.meta span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.meta b{display:block;margin-top:2px;font-size:13px}
+.shingle-svg{width:100%;height:auto;display:block}
+.tree{display:grid;gap:10px}
+.tree-root{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center}
+.node{border:1px solid var(--line);background:white;padding:10px;font-size:12px}
+.branches{display:grid;gap:6px}
+.branch{display:grid;grid-template-columns:110px 1fr 48px;gap:8px;align-items:center;font-size:12px}
+.bar{height:12px;border:1px solid var(--line);background:#f2f2ee;overflow:hidden;position:relative}
+.fill{display:block;height:100%;background:var(--accent);min-width:2px;box-shadow:inset -1px 0 0 rgba(0,0,0,.14)}
+.family-card{border:1px solid var(--line);background:white;padding:10px;display:grid;gap:6px}
+.family-card b{font-size:13px}
+.family-card .p{font-size:24px;letter-spacing:-.04em}
+.family-card svg{width:100%;height:105px}
+.facade-box{border:1px solid var(--line);background:white;padding:8px}
+.facade-box svg{width:100%;height:auto;display:block}
+.facade-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:12px}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.time-card{border-top:2px solid var(--ink);padding-top:7px}
+.time-card b{font-size:12px}
+.time-card span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)}
+.leg{display:flex;align-items:center;gap:5px}
+.dot{width:10px;height:10px;border:1px solid var(--line)}
+.footer{font-size:11px;color:var(--muted);padding:12px 16px}
+.fixing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.fixing-card{border:1px solid var(--line);background:white;padding:6px;cursor:pointer;display:grid;gap:4px;transition:all .15s ease}
+.fixing-card:hover{border-color:#b5a99c;transform:translateY(-1px)}
+.fixing-card.active{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:#fffdfb}
+.fixing-card svg{width:100%;height:auto;display:block}
+.fixing-card b{font-size:11px;line-height:1}
+.fixing-card span{font-size:10px;color:var(--muted);line-height:1.15}
+.fixing-caption{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+.hintline{font-size:11px;color:var(--muted);margin-top:3px}
+.subsection{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+.subsection:first-child{border-top:0;padding-top:0;margin-top:0}
+.subhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+.subhead b{font-size:13px;letter-spacing:.02em}
+.field-stage{display:grid;grid-template-columns:minmax(190px,.62fr) 46px minmax(0,2fr);gap:10px;align-items:center}
+.stage-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px}
+.arrow-box{font-size:28px;text-align:center;color:var(--accent);line-height:1}
+.same-horizon{border-left:3px solid var(--accent);padding:8px 10px;background:#f7f2ed;margin:10px 0 12px;font-size:12px;line-height:1.4}
+.recursive-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:10px}
+.recursive-controls .control{margin:0;min-width:210px}
+.recursive-stage{display:grid;grid-template-columns:minmax(190px,.72fr) 74px minmax(0,2fr);gap:10px;align-items:center}
+.future-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rec-arrow{text-align:center;color:var(--accent);font-size:11px;line-height:1.25}
+.rec-arrow strong{display:block;font-size:30px;font-weight:400;line-height:1;margin:3px 0}
+.design-use{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.use-card{border:1px solid var(--line);background:white;padding:11px}
+.use-card b{font-size:12px}
+.use-card p{font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.initial-facade .facade-head{border-bottom:1px solid var(--line);padding-bottom:6px}
+
+.transition-block{border:1px solid var(--line);background:#fff;padding:14px;margin-top:14px}
+.transition-block:first-of-type{margin-top:0}
+.transition-block-head{display:grid;grid-template-columns:minmax(150px,.5fr) minmax(260px,1fr);gap:22px;align-items:end;border-bottom:1px solid #e4e4df;padding-bottom:12px;margin-bottom:14px}
+.transition-block-head b{display:block;font-size:16px;font-weight:600;letter-spacing:-.015em;margin-top:3px}
+.transition-index{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--time)}
+.transition-moisture{margin:0}
+.transition-moisture label{margin-bottom:5px}
+.sample-note{font-size:9.5px;color:var(--muted);margin-top:5px;letter-spacing:.02em}
+.trajectory-continuation{display:grid;grid-template-columns:80px 1fr;gap:16px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin-top:18px}
+.trajectory-continuation .ellipsis{font-size:48px;line-height:.7;letter-spacing:.12em;text-align:center;font-weight:300}
+.trajectory-continuation b{display:block;font-size:13px;font-weight:600}
+.trajectory-continuation span{display:block;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:4px;max-width:720px}
+@media(max-width:900px){.field-stage,.recursive-stage,.transition-block-head{grid-template-columns:1fr}.arrow-box,.rec-arrow{transform:rotate(90deg);padding:6px}.future-grid{grid-template-columns:1fr}.design-use{grid-template-columns:1fr}}
+@media(max-width:1200px){.layout{grid-template-columns:1fr}.controls{position:static}}
+@media(max-width:1100px){.grid2{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.step{border-right:0;border-bottom:1px solid var(--line)}.grid3,.timeline{grid-template-columns:1fr}.state-wrap{grid-template-columns:1fr}}
+@media(max-width:640px){.fixing-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+<style id="thesis-unified-ui">
+/* --- Thesis unified interface: common visual language across all three cases --- */
+:root{
+  --bg:#ffffff;
+  --paper:#ffffff;
+  --ink:#161616;
+  --muted:#6c6c68;
+  --line:#d9d9d4;
+  --soft:#f7f7f4;
+  --state:#f07b36;
+  --variables:#3eaa57;
+  --transform:#52a6f2;
+  --family:#a34aa3;
+  --time:#1d1d1d;
+  --shadow:none;
+}
+html,body{background:var(--bg);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+body{padding:24px}
+.app{max-width:1440px;gap:22px}
+.panel{background:var(--paper);border:1px solid var(--line);box-shadow:none}
+header.panel{border:0;border-bottom:1px solid var(--ink);padding:20px 0 18px}
+header .kicker{color:var(--ink);font-size:10px;letter-spacing:.16em}
+h1{font-size:32px;line-height:1.08;letter-spacing:-.035em;font-weight:500}
+.subtitle{margin-top:9px;max-width:960px;font-size:13px;line-height:1.5;color:var(--muted)}
+.steps{margin-top:20px;border-top:1px solid var(--line)}
+.step{padding:10px 12px 8px;border-right:0;border-left:1px solid #ecece8;font-size:11px;color:var(--muted)}
+.step:first-child{border-left:0}
+.step b{font-size:10px;margin-bottom:4px;letter-spacing:.12em}
+.steps .step:nth-child(1) b{color:var(--state)}
+.steps .step:nth-child(2) b{color:var(--variables)}
+.steps .step:nth-child(3) b{color:var(--transform)}
+.steps .step:nth-child(4) b{color:var(--family)}
+.steps .step:nth-child(5) b{color:var(--time)}
+.layout{grid-template-columns:350px minmax(0,1fr);gap:22px}
+.controls{top:18px}
+.controls.panel{background:#fafaf8;border-color:#e1e1dc}
+.controls .inner,.section .inner{padding:18px}
+.control{margin-bottom:17px}
+label{font-size:9.5px;letter-spacing:.09em;line-height:1.3}
+select,input[type=number]{padding:9px 10px;border:1px solid #cfcfca;background:#fff;border-radius:0}
+input[type=range]{accent-color:var(--ink)}
+button{padding:9px 11px;border-radius:0;font-size:11px;letter-spacing:.03em}
+.note{background:transparent;color:var(--muted);border-left:1px solid var(--ink);padding:8px 0 8px 12px;font-size:11px;line-height:1.5}
+.main{gap:22px}
+.grid2{gap:22px}
+.grid3,.future-grid{gap:12px}
+.section{border-color:#dfdfda}
+.section.step-12{border-top:2px solid transparent;border-image:linear-gradient(90deg,var(--state) 0 50%,var(--variables) 50% 100%) 1}
+.section.step-transform{border-top:2px solid var(--transform)}
+.section.step-family{border-top:2px solid var(--family)}
+.section.step-time{border-top:2px solid var(--time)}
+.section-title{padding:11px 16px 10px;border-bottom:1px solid #e4e4df}
+.section-title h2{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.section-title .small{max-width:52%;text-align:right}
+.kicker{font-size:9.5px;letter-spacing:.13em}
+.small{font-size:11px;line-height:1.45}
+.section.step-12 .kicker .n-state{color:var(--state)}
+.section.step-12 .kicker .n-var{color:var(--variables)}
+.section.step-transform .kicker{color:var(--transform)}
+.section.step-family .kicker{color:var(--family)}
+.section.step-time .kicker{color:var(--time)}
+.state-card,.node,.family-card,.facade-box,.metric,.use-card,.how-read-item,.land-use-card,.priority-card,
+.formula-read>div,.water-line{border-color:#deded9;box-shadow:none}
+.family-card,.state-card,.node,.facade-box,.metric,.use-card,.how-read-item{background:#fff}
+.meta{border-top:1px solid #dadad5}
+.meta span{font-size:9px;letter-spacing:.09em}
+.meta b{font-size:12px;font-weight:500}
+.formula{background:#fafaf7;border-color:#deded9;font-size:16px}
+.same-horizon{background:transparent;border-left:1px solid var(--family);padding:8px 0 8px 12px}
+.rule-card{background:transparent;border-color:#deded9}
+.subsection{border-top:1px solid #deded9;padding-top:18px;margin-top:18px}
+.subhead{margin-bottom:12px}
+.subhead b{font-size:12px;font-weight:600}
+.stage-label{font-size:9.5px;letter-spacing:.11em}
+.arrow-box{color:var(--ink);font-weight:300}
+.rec-arrow{color:var(--ink)}
+.method-strip{margin-top:12px;padding-top:10px;border-top:1px solid #deded9;font-size:10.5px;line-height:1.5;color:var(--muted)}
+.method-strip b{color:var(--ink);font-weight:600}
+.method-strip .method-row{display:block;margin-top:2px}
+.design-use{gap:12px}
+.use-card{padding:12px}
+.use-card b{font-size:11px;font-weight:600}
+.use-card p{font-size:10.5px;line-height:1.5}
+.footer{border:0;border-top:1px solid var(--line);padding:10px 0;color:#8a8a84}
+.legend{font-size:15px; gap:18px; margin-top:12px}
+.leg{display:flex;align-items:center;gap:8px;font-size:15px;line-height:1.2}
+.dot{width:16px;height:16px;border:1px solid var(--line);flex:0 0 16px}
+@media(max-width:1200px){.layout{grid-template-columns:1fr}.controls{position:static}}
+</style></head>
+<body>
+<div class="app">
+<header class="panel">
+<h1>Case 01 – Design under natural material aging</h1>
+<p class="subtitle">A material-scale demonstrator of the Probabilistic Design Framework.</p>
+<div class="steps">
+<div class="step"><b>01</b>Current state</div>
+<div class="step"><b>02</b>Variables</div>
+<div class="step"><b>03</b>Probabilistic transformation</div>
+<div class="step"><b>04</b>Family of possible states</div>
+<div class="step"><b>05</b>Recursive temporal update</div>
+</div>
+</header>
+<div class="layout">
+<aside class="panel controls">
+<div class="inner">
+<div class="control">
+<label for="grain">Current-state attribute · grain orientation</label>
+<select id="grain">
+<option value="vertical">Vertical grain</option>
+<option value="horizontal">Horizontal grain</option>
+</select>
+<div class="hintline">Grain orientation switches between the A-series and B-series fixing families.</div>
+</div>
+<div class="control">
+<label>Current-state attribute · fixing configuration</label>
+<div class="fixing-grid" id="fixingGrid"></div>
+<div class="fixing-caption" id="fixingCaption"></div>
+</div>
+<div class="control">
+<label for="condition">Current-state attribute · material condition</label>
+<select id="condition">
+<option value="clean">Clean / intact</option>
+<option value="bent">Already bent</option>
+<option value="cracked">Already cracked</option>
+<option value="weathered">Surface weathered</option>
+</select>
+</div>
+<div class="control">
+<label for="moisture">External variable · moisture exposure · T0 → T1</label>
+<div class="row"><input id="moisture" max="100" min="0" type="range" value="55"/><span class="value" id="moistureVal">55%</span></div>
+</div>
+<div class="control">
+<label for="field">Architectural field · facade grid</label>
+<select id="field">
+<option value="8">8 × 8</option>
+<option selected="" value="10">10 × 10</option>
+<option value="12">12 × 12</option>
+</select>
+</div>
+<div class="control">
+<label for="seed">Stochastic seed</label>
+<input id="seed" type="number" value="21"/>
+</div>
+<div class="buttonrow">
+<button id="run">Update</button>
+<button class="secondary" id="random">New seed</button>
+</div>
+<div style="height:12px"></div>
+<div class="note"><b>Methodological note. </b>The 12 fixing configurations for each grain family are retained from the source experiment. Transition weights in this demonstrator are illustrative rather than statistically calibrated; they encode observed modes of material behavior as a proof of concept.</div>
+</div>
+</aside>
+<main class="main">
+<div class="grid2">
+<section class="panel section step-12">
+<div class="section-title">
+<div><div class="kicker"><span class="n-state">01</span> + <span class="n-var">02</span></div><h2>Current state + variables</h2></div>
+<div class="small">material attributes at T0 + external moisture exposure</div>
+</div>
+<div class="inner state-wrap">
+<div class="state-card">
+<svg class="shingle-svg" id="stateShingle" viewbox="0 0 220 300"></svg>
+</div>
+<div>
+<div class="state-meta">
+<div class="meta"><span>Material system</span><b>Timber shingle</b></div>
+<div class="meta"><span>Fixing</span><b id="metaFix">A8</b></div>
+<div class="meta"><span>Grain</span><b id="metaGrain">Vertical</b></div>
+<div class="meta"><span>Initial condition</span><b id="metaCond">Clean</b></div>
+<div class="meta"><span>External variable</span><b>Moisture exposure</b></div>
+<div class="meta"><span>Current value</span><b id="metaMoist">55%</b></div>
+</div>
+</div>
+</div>
+</section>
+<section class="panel section step-transform">
+<div class="section-title">
+<div><div class="kicker">03</div><h2>Probabilistic transformation</h2></div>
+<div class="small">current state + moisture exposure → conditional transition probabilities</div>
+</div>
+<div class="inner tree">
+<div class="tree-root">
+<div class="node" id="rootNode">Clean shingle<br/><span class="small">A8 · vertical grain</span></div>
+<div class="branches" id="branches"></div>
+</div></div>
+</section>
+</div>
+<section class="panel section step-family">
+<div class="section-title">
+<div><div class="kicker">04</div><h2>Family of possible states</h2></div>
+<div class="small">same current state + same variable value · possible material outcomes</div>
+</div>
+<div class="inner">
+<div class="grid3" id="family"></div>
+<div class="subsection">
+<div class="subhead">
+<div><b>From component to architectural field</b><div class="small">individual shingle trajectories assembled into a single facade realization</div></div>
+</div>
+<div class="field-stage">
+<div>
+<div class="stage-label">Current architectural field · T0</div>
+<div class="facade-box initial-facade" id="initialFacade"></div>
+</div>
+<div class="arrow-box">→</div>
+<div>
+<div class="stage-label" id="t1FamilyLabel">Family of possible facade states · T1</div>
+<div id="facades"></div>
+</div>
+</div>
+<div class="legend">
+<span class="leg"><span class="dot" style="background:#d1ad7f"></span>clean</span>
+<span class="leg"><span class="dot" style="background:#b98352"></span>bent</span>
+<span class="leg"><span class="dot" style="background:#d35a4b"></span>cracked</span>
+<span class="leg"><span class="dot" style="background:#8c7a60"></span>weathered</span>
+</div>
+<p class="small" style="margin-top:8px"><b>Weathered state rule.</b> Once a shingle reaches the dark-brown <em>weathered</em> state, it is treated as terminal and remains weathered in subsequent transitions.</p>
+</div></div>
+</section>
+<section class="panel section step-time">
+<div class="section-title">
+<div><div class="kicker">05</div><h2>Recursive temporal update</h2></div>
+<div class="small">each realised state becomes the current state for the next probabilistic transition</div>
+</div>
+<div class="inner">
+<div class="subsection">
+
+<div class="transition-block">
+<div class="transition-block-head">
+<div><span class="transition-index">Transition 02</span><b>T1 → T2</b></div>
+<div class="control transition-moisture">
+<label for="moisture2">External variable · moisture exposure · T1 → T2</label>
+<div class="row"><input id="moisture2" max="100" min="0" type="range" value="70"/><span class="value" id="moisture2Val">70%</span></div>
+</div>
+</div>
+<div class="recursive-stage">
+<div>
+<div class="stage-label">Observed state · T1</div>
+<div class="facade-box" id="observedFacade"></div>
+</div>
+<div class="rec-arrow"><span>becomes the new<br/>current state</span><strong>→</strong><span>sample once</span></div>
+<div>
+<div class="stage-label" id="t2FamilyLabel">New family of possible states · T2</div>
+<div class="facade-box" id="futureFacade"></div>
+<div class="sample-note">one sampled facade realization shown</div>
+</div>
+</div>
+</div>
+
+<div class="transition-block">
+<div class="transition-block-head">
+<div><span class="transition-index">Transition 03</span><b>T2 → T3</b></div>
+<div class="control transition-moisture">
+<label for="moisture3">External variable · moisture exposure · T2 → T3</label>
+<div class="row"><input id="moisture3" max="100" min="0" type="range" value="60"/><span class="value" id="moisture3Val">60%</span></div>
+</div>
+</div>
+<div class="recursive-stage">
+<div>
+<div class="stage-label">Observed state · T2</div>
+<div class="facade-box" id="t2InheritedFacade"></div>
+</div>
+<div class="rec-arrow"><span>becomes the new<br/>current state</span><strong>→</strong><span>sample once</span></div>
+<div>
+<div class="stage-label" id="t3Label">New family of possible states · T3</div>
+<div class="facade-box" id="t3Facade"></div>
+<div class="sample-note">one sampled facade realization shown</div>
+</div>
+</div>
+</div>
+
+<div class="trajectory-continuation">
+<div class="ellipsis">…</div>
+<div><b>T3 → T4 → … → Tn</b><span>The same probabilistic update can be repeated for as many successive states as required, redefining the external variable at each transition.</span></div>
+</div>
+
+<p class="small" style="margin-top:10px">The trajectory is path-dependent: the realised condition of each shingle at one state determines the transition probabilities available at the next. Moisture exposure can be redefined independently for every transition, while weathered shingles remain terminal.</p>
+</div>
+</div>
+</section>
+<section class="panel footer">Probabilistic Design Framework · single stochastic trajectory demonstrator</section>
+</main>
+</div>
+</div>
+<script>
+const FIXINGS={
+  A1:{series:"A",label:"A1",description:"two top-corner fixings",pins:[[.12,.06],[.88,.06]]},
+  A2:{series:"A",label:"A2",description:"four corner fixings",pins:[[.12,.06],[.88,.06],[.12,.94],[.88,.94]]},
+  A3:{series:"A",label:"A3",description:"single top-center fixing",pins:[[.50,.06]]},
+  A4:{series:"A",label:"A4",description:"top-center and bottom-center fixings",pins:[[.50,.06],[.50,.94]]},
+  A5:{series:"A",label:"A5",description:"two mid-side fixings",pins:[[.12,.50],[.88,.50]]},
+  A6:{series:"A",label:"A6",description:"top-center with two bottom-corner fixings",pins:[[.50,.06],[.12,.94],[.88,.94]]},
+  A7:{series:"A",label:"A7",description:"top-left and bottom-right fixings",pins:[[.12,.06],[.88,.94]]},
+  A8:{series:"A",label:"A8",description:"top corners with one bottom-left fixing",pins:[[.12,.06],[.88,.06],[.12,.94]]},
+  A9:{series:"A",label:"A9",description:"single central fixing",pins:[[.50,.50]]},
+  A10:{series:"A",label:"A10",description:"single bottom-center fixing",pins:[[.50,.94]]},
+  A11:{series:"A",label:"A11",description:"two bottom-corner fixings",pins:[[.12,.94],[.88,.94]]},
+  A12:{series:"A",label:"A12",description:"top-left, center and bottom-right fixings",pins:[[.12,.06],[.50,.50],[.88,.94]]},
+  B1:{series:"B",label:"B1",description:"two top-corner fixings",pins:[[.12,.06],[.88,.06]]},
+  B2:{series:"B",label:"B2",description:"four corner fixings",pins:[[.12,.06],[.88,.06],[.12,.94],[.88,.94]]},
+  B3:{series:"B",label:"B3",description:"single top-center fixing",pins:[[.50,.06]]},
+  B4:{series:"B",label:"B4",description:"top-center and bottom-center fixings",pins:[[.50,.06],[.50,.94]]},
+  B5:{series:"B",label:"B5",description:"two mid-side fixings",pins:[[.12,.50],[.88,.50]]},
+  B6:{series:"B",label:"B6",description:"top-center with two bottom-corner fixings",pins:[[.50,.06],[.12,.94],[.88,.94]]},
+  B7:{series:"B",label:"B7",description:"top-left and bottom-right fixings",pins:[[.12,.06],[.88,.94]]},
+  B8:{series:"B",label:"B8",description:"top corners with one bottom-left fixing",pins:[[.12,.06],[.88,.06],[.12,.94]]},
+  B9:{series:"B",label:"B9",description:"single central fixing",pins:[[.50,.50]]},
+  B10:{series:"B",label:"B10",description:"single bottom-center fixing",pins:[[.50,.94]]},
+  B11:{series:"B",label:"B11",description:"two bottom-corner fixings",pins:[[.12,.94],[.88,.94]]},
+  B12:{series:"B",label:"B12",description:"top-left, center and bottom-right fixings",pins:[[.12,.06],[.50,.50],[.88,.94]]}
+};
+const labels={stable:"Remain stable",bend:"Bend / warp",vcrack:"Vertical crack",hcrack:"Horizontal crack",weather:"Surface weathering"};
+function stableOutcomeLabel(condition){
+  if(condition==="bent") return "Remain bent";
+  if(condition==="cracked") return "Remain cracked";
+  if(condition==="weathered") return "Remain weathered";
+  return "Remain stable";
+}
+function visualStateForOutcome(originCondition,outcome,grain){
+  if(outcome==="stable"){
+    if(originCondition==="bent") return "bend";
+    if(originCondition==="cracked") return grain==="vertical" ? "vcrack" : "hcrack";
+    if(originCondition==="weathered") return "weathered";
+    return "clean";
+  }
+  return outcome;
+}
+const colors={stable:"#d1ad7f",bend:"#b98352",vcrack:"#d35a4b",hcrack:"#d35a4b",weather:"#8c7a60"};
+const $=id=>document.getElementById(id);
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function norm(d){let s=Object.values(d).reduce((a,b)=>a+b,0)||1;let o={};Object.entries(d).forEach(([k,v])=>o[k]=v/s);return o}
+function fixingBase(fixKey,grain){
+  const pins=FIXINGS[fixKey].pins;
+  const n=pins.length;
+  let top=0,bottom=0,center=0,left=0,right=0;
+  pins.forEach(([x,y])=>{
+    if(y<.18) top++; if(y>.82) bottom++; if(x>.35&&x<.65&&y>.35&&y<.65) center++; if(x<.2) left++; if(x>.8) right++;
+  });
+  let base={stable:0.63,bend:0.12,vcrack:0.10,hcrack:0.10,weather:0.05};
+  if(n===4){base.stable+=0.08;base.bend-=0.03;base.vcrack-=0.02;base.hcrack-=0.02;}
+  if(n===1){base.stable-=0.08;base.bend+=0.04;base.vcrack+=0.02;base.hcrack+=0.02;}
+  if(n===2 && top===2){base.bend+=0.04;base.stable-=0.03;}
+  if(n===2 && bottom===2){base.bend+=0.03;base.stable-=0.03;}
+  if(n===2 && center===0 && ((top===1&&bottom===1)||(left===1&&right===1))){base.stable+=0.01;}
+  if(center>0){base.stable-=0.02;base.bend+=0.01;base.weather+=0.01;}
+  if((top>0&&bottom>0)&&(left>0&&right>0)){base.stable+=0.03;}
+  if(grain==="vertical"){
+    base.vcrack+=0.06;
+    base.hcrack-=0.03;
+    if(left+right>=3){base.vcrack+=0.02;}
+    if(center>0 && n===1){base.vcrack+=0.02;base.stable-=0.02;}
+  }else{
+    base.hcrack+=0.06;
+    base.vcrack-=0.03;
+    if(top+bottom>=3){base.hcrack+=0.02;}
+    if(center>0 && n===1){base.hcrack+=0.02;base.stable-=0.02;}
+  }
+  base.weather=Math.max(0.03,base.weather);
+  base.bend=Math.max(0.04,base.bend);
+  base.vcrack=Math.max(0.02,base.vcrack);
+  base.hcrack=Math.max(0.02,base.hcrack);
+  base.stable=Math.max(0.20,base.stable);
+  return norm(base);
+}
+function currentFixing(){
+  const grain=$("grain").value;
+  const active=document.querySelector('.fixing-card.active');
+  if(active) return active.dataset.key;
+  return grain==='vertical' ? 'A1' : 'B1';
+}
+function shingleSVG(state="clean",fixKey="A8",grain="vertical",seed=1,small=false){
+  const f=FIXINGS[fixKey];
+  let fill=state==="weathered"?"#a79372":"#d1ad7f";
+  const W=small?92:220, H=small?150:300, ox=small?16:40, oy=small?10:18, sw=small?60:140, sh=small?126:264;
+  let s=`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fbfaf7"/><g transform="translate(${ox} ${oy})">`;
+  const bent=state==="bend";
+  const path=bent?`M0 0 Q-8 ${sh*.5} 0 ${sh} L${sw} ${sh} Q${sw+8} ${sh*.5} ${sw} 0 Z`:`M0 0 L${sw} 0 L${sw} ${sh} L0 ${sh} Z`;
+  s+=`<path d="${path}" fill="${fill}" stroke="#5f4d3f" stroke-width="${small?1.4:2}"/>`;
+  if(grain==="vertical"){
+    for(let x=8;x<sw-6;x+=small?9:18)s+=`<path d="M${x} 6 q-4 ${sh*.16} 0 ${sh*.32} t0 ${sh*.32} t0 ${sh*.18}" fill="none" stroke="#8b6d4e" opacity=".35" stroke-width="${small?.7:1}"/>`;
+  }else{
+    for(let y=14;y<sh-10;y+=small?12:26)s+=`<path d="M6 ${y} q${sw*.22} -4 ${sw*.44} 0 t${sw*.28} 0" fill="none" stroke="#8b6d4e" opacity=".35" stroke-width="${small?.7:1}"/>`;
+  }
+  f.pins.forEach(p=>s+=`<circle cx="${p[0]*sw}" cy="${p[1]*sh}" r="${small?3.6:5}" fill="#fbfaf7" stroke="#3d342d" stroke-width="${small?1.1:1.5}"/>`);
+  if(state==="vcrack")s+=`<path d="M${sw*.28} 8 l-3 ${sh*.14} 4 ${sh*.14} -4 ${sh*.17} 5 ${sh*.18} -3 ${sh*.17}" fill="none" stroke="#c43f35" stroke-width="${small?2.4:4}" stroke-linecap="round"/>`;
+  if(state==="hcrack")s+=`<path d="M8 ${sh*.46} l${sw*.16} -4 ${sw*.14} 5 ${sw*.18} -5 ${sw*.16} 4 ${sw*.16} -2" fill="none" stroke="#c43f35" stroke-width="${small?2.4:4}" stroke-linecap="round"/>`;
+  if(state==="weathered"){
+    for(let x=6;x<sw-4;x+=small?7:10)s+=`<path d="M${x} ${sh*.78} l0 ${sh*.14}" stroke="#6f5e49" stroke-width="${small?1:1.5}" opacity=".8"/>`;
+  }
+  s+=`</g></svg>`;
+  return s;
+}
+function renderFixingGrid(){
+  const grain=$("grain").value;
+  const prefix=grain==='vertical'?'A':'B';
+  const selected=currentFixing().startsWith(prefix) ? currentFixing() : `${prefix}1`;
+  const keys=Object.keys(FIXINGS).filter(k=>k.startsWith(prefix));
+  $("fixingGrid").innerHTML=keys.map(key=>{
+    const item=FIXINGS[key];
+    return `<div class="fixing-card ${key===selected?'active':''}" data-key="${key}">
+      ${shingleSVG('clean',key,grain,1,true)}
+      <b>${item.label}</b>
+      <span>${item.description}</span>
+    </div>`;
+  }).join('');
+  $("fixingCaption").textContent=`Showing the ${keys.length} fixing configurations currently linked to the ${grain} grain family (${prefix}-series). Click a card to activate it.`;
+  document.querySelectorAll('.fixing-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      document.querySelectorAll('.fixing-card').forEach(c=>c.classList.remove('active'));
+      card.classList.add('active');
+      renderAll();
+    });
+  });
+}
+function transitionDistribution(condition,fixKey,grain,moisture){
+  if(condition==="weathered") return {stable:0,bend:0,vcrack:0,hcrack:0,weather:1};
+  let d={...fixingBase(fixKey,grain)};
+  const m=moisture;
+  const damageBoost=.55+.95*m;
+  d.bend*=damageBoost;
+  d.vcrack*=damageBoost;
+  d.hcrack*=damageBoost;
+  d.weather*=.35+1.6*m;
+  d.stable*=1.35-.85*m;
+  if(condition==="bent"){
+    d.bend*=.15;
+    d.vcrack*=1.45;
+    d.hcrack*=1.45;
+    d.weather*=1.2;
+    d.stable*=.85;
+  }
+  if(condition==="cracked"){
+    d.vcrack*=.25;
+    d.hcrack*=.25;
+    d.bend*=1.25;
+    d.weather*=1.55;
+    d.stable*=.8;
+  }
+  return norm(d);
+}
+function currentDistribution(){
+  return transitionDistribution(
+    $("condition").value,
+    currentFixing(),
+    $("grain").value,
+    +$("moisture").value/100
+  );
+}
+function renderState(){
+  const fix=currentFixing(), grain=$("grain").value, cond=$("condition").value;
+  let st=cond==="clean"?"clean":cond;
+  if(st==="cracked") st=grain==="vertical"?"vcrack":"hcrack";
+  $("stateShingle").innerHTML=shingleSVG(st,fix,grain,11).replace(/^<svg[^>]*>|<\/svg>$/g,"");
+  $("metaFix").textContent=fix;
+  $("metaGrain").textContent=grain[0].toUpperCase()+grain.slice(1);
+  $("metaCond").textContent=cond[0].toUpperCase()+cond.slice(1);
+  $("metaMoist").textContent=$("moisture").value+"%";
+  $("rootNode").innerHTML=`${$("metaCond").textContent} shingle<br><span class="small">${fix} · ${grain} grain</span>`;
+}
+function renderTree(){
+  const d=currentDistribution();
+  const originCondition=$("condition").value;
+  $("branches").innerHTML=Object.entries(d).map(([k,p])=>`
+    <div class="branch">
+      <span>${k==="stable"?stableOutcomeLabel(originCondition):labels[k]}</span>
+      <span class="bar"><span class="fill" style="width:${(p*100).toFixed(1)}%;background:${colors[k]}"></span></span>
+      <b>${(p*100).toFixed(0)}%</b>
+    </div>`).join("");
+}
+function renderFamily(){
+  const d=currentDistribution(), fix=currentFixing(), grain=$("grain").value;
+  const originCondition=$("condition").value;
+  const order=["stable","bend","vcrack","hcrack","weather"];
+  $("family").innerHTML=order.map((k,i)=>{
+    const state=visualStateForOutcome(originCondition,k,grain);
+    const label=k==="stable" ? stableOutcomeLabel(originCondition) : labels[k];
+    return `<div class="family-card">
+      ${shingleSVG(state,fix,grain,30+i)}
+      <b>${label}</b>
+      <div class="p">${(d[k]*100).toFixed(0)}%</div>
+      <div class="small">possible next material state</div>
+    </div>`;
+  }).join("");
+}
+function weightedChoice(d,rng){let r=rng();for(const [k,p] of Object.entries(d)){r-=p;if(r<=0)return k}return "stable"}
+function evolveCell(cell,fixKey,grain,moisture,rng){
+  if(cell.weather) return;
+  const condition=cell.vcrack||cell.hcrack ? "cracked" : (cell.bent ? "bent" : "clean");
+  const d=transitionDistribution(condition,fixKey,grain,moisture);
+  const o=weightedChoice(d,rng);
+  if(o==="bend") cell.bent=true;
+  if(o==="vcrack") cell.vcrack=true;
+  if(o==="hcrack") cell.hcrack=true;
+  if(o==="weather") cell.weather=true;
+}
+let t1Facade=[];
+let t2Facade=[];
+let t3Facade=[];
+function initialCell(){
+  const cond=$("condition").value, grain=$("grain").value;
+  return {
+    bent:cond==="bent",
+    vcrack:cond==="cracked" && grain==="vertical",
+    hcrack:cond==="cracked" && grain==="horizontal",
+    weather:cond==="weathered"
+  };
+}
+function makeInitialCells(n){
+  const base=initialCell();
+  return Array.from({length:n*n},()=>({...base}));
+}
+function cloneCells(cells){return cells.map(c=>({...c}))}
+function simulateCells(startCells,seedOffset,moistureValue=null){
+  const fix=currentFixing(), grain=$("grain").value, moisture=(moistureValue===null? +$("moisture").value : moistureValue)/100;
+  const seed=(+$("seed").value||1)+seedOffset*7919;
+  const rng=mulberry32(seed);
+  const cells=cloneCells(startCells);
+  cells.forEach(c=>evolveCell(c,fix,grain,moisture,rng));
+  return cells;
+}
+function facadeSVG(cells,seedOffset=0){
+  const n=+$("field").value;
+  const rng=mulberry32((+$("seed").value||1)+seedOffset*104729);
+  const W=360,H=360,pad=10,gap=3,w=(W-pad*2-gap*(n-1))/n,h=w*1.35;
+  const step=(H-pad*2-h)/Math.max(1,n-1);
+  let s=`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fbfaf7"/>`;
+  cells.forEach((c,i)=>{
+    const r=Math.floor(i/n), col=i%n, x=pad+col*(w+gap), y=pad+r*step;
+    let fill="#d1ad7f";
+    if(c.weather)fill="#8c7a60"; else if(c.vcrack||c.hcrack)fill="#d8a27b"; else if(c.bent)fill="#b98352";
+    const dx=c.bent?(rng()-.5)*3:0;
+    s+=`<g transform="translate(${(x+dx).toFixed(1)} ${y.toFixed(1)})">`;
+    s+=`<rect x="0" y="0" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}" stroke="#6f5d4f" stroke-width=".45"/>`;
+    if(c.vcrack)s+=`<path d="M${(w*.25).toFixed(1)} 2 l-1 ${h*.35} 2 ${h*.28} -1 ${h*.25}" stroke="#c43f35" stroke-width="1.1" fill="none"/>`;
+    if(c.hcrack)s+=`<path d="M2 ${(h*.48).toFixed(1)} l${w*.28} -1 ${w*.25} 2 ${w*.25} -1" stroke="#c43f35" stroke-width="1.1" fill="none"/>`;
+    s+=`</g>`;
+  });
+  s+=`</svg>`;
+  return s;
+}
+function stateSummary(cells){
+  const n=cells.length;
+  const counts={clean:0,bent:0,cracked:0,weathered:0};
+  cells.forEach(c=>{
+    if(c.weather)counts.weathered++;
+    else if(c.vcrack||c.hcrack)counts.cracked++;
+    else if(c.bent)counts.bent++;
+    else counts.clean++;
+  });
+  return Object.entries(counts).map(([k,v])=>`${k} ${Math.round(v/n*100)}%`).join(' · ');
+}
+function facadeCard(title,stateLabel,cells,seedOffset){
+  return `<div class="facade-box"><div class="facade-head"><b>${title}</b><span>${stateLabel}</span></div>${facadeSVG(cells,seedOffset)}<div class="small" style="margin-top:5px">${stateSummary(cells)}</div></div>`;
+}
+function renderFacades(){
+  const n=+$("field").value;
+  const initial=makeInitialCells(n);
+  $("initialFacade").innerHTML=`<div class="facade-head"><b>Initial field</b><span>T0</span></div>${facadeSVG(initial,0)}<div class="small" style="margin-top:5px">${stateSummary(initial)}</div>`;
+  t1Facade=simulateCells(initial,1,+$("moisture").value);
+  $("t1FamilyLabel").textContent=`Family of possible facade states · T1 · moisture ${$("moisture").value}%`;
+  $("facades").innerHTML=facadeCard('Sampled path','T1',t1Facade,20);
+}
+function renderRecursive(){
+  if(!t1Facade.length)return;
+  const moisture2=+$("moisture2").value;
+  const moisture3=+$("moisture3").value;
+  $("observedFacade").innerHTML=facadeSVG(t1Facade,50)+`<div class="small" style="margin-top:5px">${stateSummary(t1Facade)}</div>`;
+  t2Facade=simulateCells(t1Facade,101,moisture2);
+  $("t2FamilyLabel").textContent=`New family of possible states · T2 · moisture ${moisture2}%`;
+  $("futureFacade").innerHTML=facadeSVG(t2Facade,70)+`<div class="small" style="margin-top:5px">${stateSummary(t2Facade)}</div>`;
+  $("t2InheritedFacade").innerHTML=facadeSVG(t2Facade,71)+`<div class="small" style="margin-top:5px">${stateSummary(t2Facade)}</div>`;
+  t3Facade=simulateCells(t2Facade,201,moisture3);
+  $("t3Label").textContent=`New family of possible states · T3 · moisture ${moisture3}%`;
+  $("t3Facade").innerHTML=facadeSVG(t3Facade,90)+`<div class="small" style="margin-top:5px">${stateSummary(t3Facade)}</div>`;
+}
+function renderAll(){
+  $("moistureVal").textContent=$("moisture").value+"%";
+  if($("moisture2Val")) $("moisture2Val").textContent=$("moisture2").value+"%";
+  if($("moisture3Val")) $("moisture3Val").textContent=$("moisture3").value+"%";
+  renderState();renderTree();renderFamily();renderFacades();renderRecursive();
+}
+$("grain").addEventListener("change",()=>{renderFixingGrid();renderAll();});
+["condition","moisture","moisture2","moisture3","field","seed"].forEach(id=>{
+  $(id).addEventListener("input",renderAll);
+  $(id).addEventListener("change",renderAll);
+});
+$("run").addEventListener("click",renderAll);
+$("random").addEventListener("click",()=>{$("seed").value=Math.floor(Math.random()*99999);renderAll()});
+renderFixingGrid();
+renderAll();
+</script>
+</body>
+</html>
